@@ -4,7 +4,10 @@ Prints everything!
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 
-Usage:
+> support from C++11 to C++20
+
+## Usage
+
 ```cpp
 debug(), "my variable is", your_variable;
 ```
@@ -52,7 +55,7 @@ TL;DR: This is a useful debugging utility the C++ programmers had all dreamed of
 7. Thread safe, every line of message is always distinct, no annoying interleaving output rushing into console (typical experience when using cout)
 
 
-# Configurations
+## Configurations
 
 Here is a list of configurable macros, define them **before** including this header file to take effect:
 

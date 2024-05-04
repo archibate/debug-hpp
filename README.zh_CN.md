@@ -4,14 +4,17 @@
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 
-用法:
+> 支持从 C++11 到 C++20 的任何标准
+
+## 用法
+
 ```cpp
 debug(), "我的变量是", your_variable;
 ```
 
 输出:
 ```
-  your_file.cpp:233:  我的变量是 {1, 2, 3}
+your_file.cpp:233:  我的变量是 {1, 2, 3}
 ```
 
 > 假设your_variable是一个`std::vector`
@@ -49,7 +52,7 @@ debug().check(some_variable) > 0;
 7. 线程安全，每行消息始终是独立的，没有烦人的交错输出冲进控制台（这是你使用cout时的典型体验）。
 
 
-# 可配置选项
+## 可配置选项
 
 以下是一些可配置的宏，**在包含此头文件之前**定义它们即可生效:
 
