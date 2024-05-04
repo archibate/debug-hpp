@@ -1,8 +1,8 @@
 # debug.hpp
 
-受够了手动遍历 vector 并逐个 cout 打印的低效调试？
+🥵 受够了手动遍历 vector 并逐个 cout 的低效调试？
 
-来试试这个单头文件库吧 🚀 无痛打印包括 STL 容器在内的任何对象！
+来试试这个单头文件库吧 🚀 无痛打印包括 STL 容器在内的任何对象！🤩
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 

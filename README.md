@@ -1,8 +1,8 @@
 # debug.hpp
 
-Tired of the dumb debugging of manually traversing vectors or maps and printing them with the stupid `cout <<` one by one?
+🥵 Tired of the dumb debugging of manually traversing containers and `cout <<` them one by one?
 
-Try this handy header-only library 🚀 prints everything including STL containers without pain!
+Try this handy header-only library 🚀 prints everything including STL containers without pain! 🤩
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 
