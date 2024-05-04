@@ -47,7 +47,10 @@
 // `#define DEBUG_LEVEL 1` (default when !defined NDEBUG) - enable debug output, prints everything you asked to print
 // `#define DEBUG_LEVEL 2` - enable debug output with detailed source code level information (requires source files readable)
 //
-// `#define DEBUG_DEFAULT_OUTPUT std::cerr` (default) - controls where to output the debug strings
+// `#define DEBUG_SHOW_SOURCE_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
+// `#define DEBUG_SHOW_SOURCE_LOCATION 0` - do not show the location mark
+//
+// `#define DEBUG_DEFAULT_OUTPUT std::cerr` (default) - controls where to output the debug strings (must be std::ostream &)
 //
 // `#define DEBUG_PANIC_METHOD 0` - throws an runtime error with debug string as message when assertion failed
 // `#define DEBUG_PANIC_METHOD 1` (default) - print the error message when assertion failed, then triggers a 'trap' interrupt, useful for debuggers to catch, if no debuggers attached, the program would terminate
@@ -91,6 +94,10 @@
 # else
 #  define DEBUG_LEVEL 1
 # endif
+#endif
+
+#ifndef DEBUG_SHOW_SOURCE_LOCATION
+#define DEBUG_SHOW_SOURCE_LOCATION 1
 #endif
 
 #ifndef DEBUG_REPR_NAME
@@ -298,9 +305,10 @@ struct debug_source_location {
     }
 };
 
-#ifndef DEBUG_SOURCE_LOCATION_FAKER
-#define DEBUG_SOURCE_LOCATION_FAKER {__FILE__, __LINE__, 0, __func__}
-#endif
+#  ifndef DEBUG_SOURCE_LOCATION_FAKER
+#   define DEBUG_SOURCE_LOCATION_FAKER \
+       { __FILE__, __LINE__, 0, __func__ }
+#  endif
 
 #  define DEBUG_SOURCE_LOCATION debug_details::debug_source_location
 # endif
@@ -761,7 +769,7 @@ struct debug_format_trait<
     }
 };
 
-#if __cpp_lib_integer_sequence
+#  if __cpp_lib_integer_sequence
 template <class F, class Tuple, std::size_t... I>
 void debug_apply_impl(F &&f, Tuple &&t, std::index_sequence<I...>) {
     std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
@@ -774,12 +782,13 @@ void debug_apply(F &&f, Tuple &&t) {
         std::make_index_sequence<
             std::tuple_size<typename std::decay<Tuple>::type>::value>{});
 }
-#else
+#  else
 template <std::size_t... I>
 struct debug_index_sequence {};
 
 template <std::size_t N, std::size_t... I>
-struct debug_make_index_sequence : debug_make_index_sequence<N - 1, I..., N - 1> {};
+struct debug_make_index_sequence
+    : debug_make_index_sequence<N - 1, I..., N - 1> {};
 
 template <std::size_t... I>
 struct debug_make_index_sequence<0, I...> : debug_index_sequence<I...> {};
@@ -796,7 +805,7 @@ void debug_apply(F &&f, Tuple &&t) {
         debug_make_index_sequence<
             std::tuple_size<typename std::decay<Tuple>::type>::value>{});
 }
-#endif
+#  endif
 
 struct debug_apply_lambda {
     std::ostream &oss;
@@ -1013,7 +1022,9 @@ private:
                 fn = fp + 1;
             }
         }
+# if DEBUG_SHOW_SOURCE_LOCATION
         oss << fn << ':' << loc.line() << ':' << DEBUG_SEPARATOR_TAB;
+# endif
         if (line) {
             oss << '[' << line << ']' << DEBUG_SEPARATOR_TAB;
 # if DEBUG_LEVEL >= 2
@@ -1247,6 +1258,12 @@ public:
             cout << oss.str();
         }
     }
+
+    operator std::string() {
+        std::string ret = oss.str();
+        state = supress;
+        return ret;
+    }
 };
 
 DEBUG_NAMESPACE_END
@@ -1328,6 +1345,10 @@ public:
     debug_condition operator>>(T const &) noexcept {
         return debug_condition{*this};
     }
+
+    operator std::string() {
+        return {};
+    }
 };
 
 DEBUG_NAMESPACE_END
@@ -1337,7 +1358,9 @@ DEBUG_NAMESPACE_END
 #ifdef DEBUG_CLASS_NAME
 # undef debug
 #elif DEBUG_LEVEL
-#ifdef DEBUG_SOURCE_LOCATION_FAKER
-#define debug() debug(DEBUG_DEFAULT_ENABLED, DEBUG_DEFAULT_OUTPUT, nullptr, DEBUG_SOURCE_LOCATION_FAKER)
-#endif
+# ifdef DEBUG_SOURCE_LOCATION_FAKER
+#  define debug()                                                 \
+      debug(DEBUG_DEFAULT_ENABLED, DEBUG_DEFAULT_OUTPUT, nullptr, \
+            DEBUG_SOURCE_LOCATION_FAKER)
+# endif
 #endif

@@ -21,3 +21,5 @@ int main() {
     debug(), f;
     return 0;
 }
+
+// g++ -std=c++11 test.cpp -I .
