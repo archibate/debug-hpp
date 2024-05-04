@@ -42,7 +42,7 @@ debug().check(some_variable) > 0;
 
 1. 使用简洁的逗号语法打印，易于使用
 2. 支持打印STL对象，包括string、vector、tuple、optional、variant、unique_ptr、type_info等（需要C++20）
-3. 只需添加一个名为`repr`的成员方法，例如`std::string repr() { ... }`即可支持打印您的自定义类!
+3. 只需添加一个名为`repr`的成员方法，例如`std::string repr() const { ... }`即可支持打印您的自定义类!
 4. 暂不支持打印的类将显示为类似`[TypeName@0xdeadbeaf]`的形式，其中0xdeadbeaf是对象的地址。
 5. 高度可定制，通过定义DEBUG_xxx宏来自定义行为（见下文）
 6. 调试完成后，只需简简单单`#define NDEBUG`，整个库就都禁用了，没有任何运行时开销

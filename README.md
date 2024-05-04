@@ -45,7 +45,7 @@ TL;DR: This is a useful debugging utility the C++ programmers had all dreamed of
 
 1. print using the neat comma syntax, easy-to-use
 2. supports printing STL objects including string, vector, tuple, optional, variant, unique_ptr, type_info, and so on. (C++20 required)
-3. just add a member method named `repr`, e.g. `std::string repr() { ... }` to support printing your custom class!
+3. just add a member method named `repr`, e.g. `std::string repr() const { ... }` to support printing your custom class!
 4. classes that are not supported to print will be shown in something like `[TypeName@0xdeadbeaf]` where 0xdeadbeaf is it's address.
 5. highly configurable, customize the behaviour by defining the DEBUG_xxx macros (see below)
 6. when debug done, supress all debug messages by simply `#define NDEBUG`, the whole library is disabled at compile-time, no runtime overhead
