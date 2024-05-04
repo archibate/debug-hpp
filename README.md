@@ -32,7 +32,7 @@ your_file.cpp:233:  my variable is {1, 2, 3}
 
 This is a feature for convenience: you don't have to busy removing all the debug() sentences after debug done, simply switch to `Release` build and everything debug is gone, no runtime overhead! And when you need debug simply switch back to `Debug` build and everything debug() you written before is back in life.
 
-If you insist to use debug() even in `Release` build, please `#define DEBUG_LEVEL 1` before including this header file.
+If you mean to use debug() even in `Release` build, just `#define DEBUG_LEVEL 1` before including this header file to force enable debugging.
 
 ## Printing custom classes
 
@@ -110,7 +110,6 @@ Here is a list of configurable macros, define them **before** including this hea
 
 * `#define DEBUG_LEVEL 0` (default when defined NDEBUG) - disable debug output, completely no runtime overhead
 * `#define DEBUG_LEVEL 1` (default when !defined NDEBUG) - enable debug output, prints everything you asked to print
-* `#define DEBUG_LEVEL 2` - enable debug output with detailed source code level information (requires source files readable)
 
 * `#define DEBUG_SHOW_SOURCE_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
 * `#define DEBUG_SHOW_SOURCE_LOCATION 0` - do not show the location mark
@@ -141,6 +140,8 @@ Here is a list of configurable macros, define them **before** including this hea
 
 * `#define DEBUG_SUPRESS_NON_ASCII 0` (default) - consider non-ascii characters in std::string as printable (e.g. UTF-8 encoded Chinese characters)
 * `#define DEBUG_SUPRESS_NON_ASCII 1` - consider non-ascii characters in std::string as not printable (print them in e.g. '\xfe' instead)
+
+* `#define DEBUG_SHOW_SOURCE_CODE_LINE 1` - enable debug output with detailed source code level information (requires readable source file path)
 
 * `#define DEBUG_SHOW_NULLOPT "nullopt"` (default) - controls how to print optional-like objects (supporting *x and (bool)x) when it is nullopt
 

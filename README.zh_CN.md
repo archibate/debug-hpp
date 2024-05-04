@@ -32,7 +32,7 @@ your_file.cpp:233:  我的变量是 {1, 2, 3}
 
 这是一个很方便的功能：无需在调试后手忙脚乱地删除所有的debug()语句，您只需切换到`Release`版本，所有的debug都会自动消失，没有任何运行时开销！需要调试时，只需再次切换回`Debug`版本，之前写的debug()语句都会重新开始工作。
 
-如果你确实需要在`Release`版本中使用debug()，可以在包含此头文件之前加上`#define DEBUG_LEVEL 1`。
+如果你确实需要在`Release`版本中使用debug()，可以在包含此头文件之前加上`#define DEBUG_LEVEL 1`来强制保持启用。
 
 ## 打印自定义类型
 
@@ -112,7 +112,6 @@ your_file.cpp:233:  assertion failed: 3 < 0
 
 * `#define DEBUG_LEVEL 0` (定义了NDEBUG时默认) - 禁用debug输出，完全没有运行时开销
 * `#define DEBUG_LEVEL 1` (!定义了NDEBUG时默认) - 启用debug输出，打印你要求打印的所有内容
-* `#define DEBUG_LEVEL 2` - 启用带有详细源代码级别信息的debug输出（需要可读的源文件）
 
 * `#define DEBUG_SHOW_SOURCE_LOCATION 1` (默认) - 在每一行调试输出前加上打印该信息的代码文件名和行号 (例如：file.cpp:233)
 * `#define DEBUG_SHOW_SOURCE_LOCATION 0` - 不显示代码文件名和行号
@@ -143,6 +142,8 @@ your_file.cpp:233:  assertion failed: 3 < 0
 
 * `#define DEBUG_SUPRESS_NON_ASCII 0` (默认) - 将std::string中的非ascii字符视为可打印的（如UTF-8编码的中文字符）
 * `#define DEBUG_SUPRESS_NON_ASCII 1` - 将std::string中的非ascii字符视为不可打印的（作为'\xfe'这样打印）
+
+* `#define DEBUG_SHOW_SOURCE_CODE_LINE 1` - 启用带有详细源代码级别信息的debug输出（需要源码文件路径可读）
 
 * `#define DEBUG_SHOW_NULLOPT "nullopt"` (默认) - 控制如何打印optional类对象（支持*x和(bool)x）当它是nullopt时
 

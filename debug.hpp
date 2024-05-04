@@ -45,7 +45,6 @@
 //
 // `#define DEBUG_LEVEL 0` (default when defined NDEBUG) - disable debug output, completely no runtime overhead
 // `#define DEBUG_LEVEL 1` (default when !defined NDEBUG) - enable debug output, prints everything you asked to print
-// `#define DEBUG_LEVEL 2` - enable debug output with detailed source code level information (requires source files readable)
 //
 // `#define DEBUG_SHOW_SOURCE_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
 // `#define DEBUG_SHOW_SOURCE_LOCATION 0` - do not show the location mark
@@ -76,6 +75,8 @@
 //
 // `#define DEBUG_SUPRESS_NON_ASCII 0` (default) - consider non-ascii characters in std::string as printable (e.g. UTF-8 encoded Chinese characters)
 // `#define DEBUG_SUPRESS_NON_ASCII 1` - consider non-ascii characters in std::string as not printable (print them in e.g. '\xfe' instead)
+//
+// `#define DEBUG_SHOW_SOURCE_CODE_LINE 1` - enable debug output with detailed source code level information (requires readable source file path)
 //
 // `#define DEBUG_SHOW_NULLOPT "nullopt"` (default) - controls how to print optional-like objects (supporting *x and (bool)x) when it is nullopt
 //
