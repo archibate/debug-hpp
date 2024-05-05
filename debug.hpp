@@ -113,6 +113,10 @@
 # define DEBUG_REPR_NAME repr
 #endif
 
+#ifndef DEBUG_FORMATTER_REPR_NAME
+# define DEBUG_FORMATTER_REPR_NAME _debug_formatter_repr
+#endif
+
 #ifndef DEBUG_NAMESPACE_BEGIN
 # define DEBUG_NAMESPACE_BEGIN
 #endif
@@ -404,6 +408,18 @@ private:
     }
 # endif
 
+public:
+    struct debug_formatter {
+        std::ostream &os;
+
+        template <class T>
+        debug_formatter &operator<<(T const &value) {
+            debug_format(os, value);
+            return *this;
+        }
+    };
+
+private:
 # if __cpp_if_constexpr && __cpp_concepts && \
      __cpp_lib_type_trait_variable_templates
 
@@ -575,10 +591,14 @@ private:
             t.DEBUG_REPR_NAME(oss);
         } else if constexpr (requires(T const &t) { DEBUG_REPR_NAME(t); }) {
             debug_format(oss, DEBUG_REPR_NAME(t));
-        } else if constexpr (requires(T const &t) {
-                                 DEBUG_REPR_NAME(oss, t);
+        } else if constexpr (requires(debug_formatter const &out, T const &t) {
+                                 t.DEBUG_FORMATTER_REPR_NAME(out);
                              }) {
-            DEBUG_REPR_NAME(oss, t);
+            t.DEBUG_FORMATTER_REPR_NAME(debug_formatter{oss});
+        } else if constexpr (requires(debug_formatter const &out, T const &t) {
+                                 DEBUG_FORMATTER_REPR_NAME(out, t);
+                             }) {
+            DEBUG_FORMATTER_REPR_NAME(debug_formatter{oss}, t);
         } else if constexpr (requires(bool &b, T const &t) {
                                  b = holds_alternative(t);
                              }) {
@@ -634,6 +654,11 @@ private:
     DEBUG_COND(is_adl_repr, DEBUG_REPR_NAME(std::declval<T const &>()));
     DEBUG_COND(is_adl_repr_stream,
                DEBUG_REPR_NAME(std::declval<std::ostream &>(),
+                               std::declval<T const &>()));
+    DEBUG_COND(is_member_repr_debug, std::declval<T const &>().DEBUG_FORMATTER_REPR_NAME(
+                                          std::declval<debug_formatter const &>()));
+    DEBUG_COND(is_adl_repr_debug,
+               DEBUG_FORMATTER_REPR_NAME(std::declval<debug_formatter const &>(),
                                std::declval<T const &>()));
 
     struct variant_test_lambda {
@@ -1133,6 +1158,53 @@ private:
         }
     };
 
+    template <class T>
+    struct debug_format_trait<
+        T,
+        typename std::enable_if<
+            !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
+            !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
+            !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
+            !debug_cond_floating_point<T>::value &&
+            !debug_cond_is_smart_pointer<T>::value &&
+            !debug_cond_is_ostream_ok<T>::value &&
+            !debug_cond_pointer<T>::value && !debug_cond_is_range<T>::value &&
+            !debug_cond_is_tuple<T>::value && !debug_cond_enum<T>::value &&
+            !debug_cond_is_member_repr<T>::value &&
+            !debug_cond_is_member_repr_stream<T>::value &&
+            !debug_cond_is_adl_repr<T>::value &&
+            !debug_cond_is_adl_repr_stream<T>::value &&
+            debug_cond_is_member_repr_debug<T>::value>::type> {
+        void operator()(std::ostream &oss, T const &t) const {
+            t.DEBUG_FORMATTER_REPR_NAME(debug_formatter{oss});
+        }
+    };
+
+    template <class T>
+    struct debug_format_trait<
+        T,
+        typename std::enable_if<
+            !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
+            !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
+            !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
+            !debug_cond_floating_point<T>::value &&
+            !debug_cond_is_smart_pointer<T>::value &&
+            !debug_cond_is_ostream_ok<T>::value &&
+            !debug_cond_pointer<T>::value && !debug_cond_is_range<T>::value &&
+            !debug_cond_is_tuple<T>::value && !debug_cond_enum<T>::value &&
+            !debug_cond_is_member_repr<T>::value &&
+            !debug_cond_is_member_repr_stream<T>::value &&
+            !debug_cond_is_adl_repr<T>::value &&
+            !debug_cond_is_adl_repr_stream<T>::value &&
+            !debug_cond_is_member_repr_debug<T>::value &&
+            debug_cond_is_adl_repr_debug<T>::value>::type> {
+        void operator()(std::ostream &oss, T const &t) const {
+            DEBUG_FORMATTER_REPR_NAME(debug_formatter{oss}, t);
+        }
+    };
+
     struct debug_visit_lambda {
         std::ostream &oss;
 
@@ -1476,7 +1548,79 @@ public:
         state = supress;
         return ret;
     }
+
+    template <class T>
+    struct named_member_t {
+        const char *name;
+        T const &value;
+
+        void DEBUG_REPR_NAME(std::ostream &os) const {
+            os << name << ": ";
+            debug_format(os, value);
+        }
+    };
+
+    template <class T>
+    named_member_t<T> named_member(const char *name, T const &value) {
+        return {name, value};
+    }
 };
+
+#define DEBUG_PP_NARG(...) DEBUG_PP_NARG_(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+#define DEBUG_PP_NARG_(...) DEBUG_PP_ARG_N(__VA_ARGS__)
+#define DEBUG_PP_ARG_N( \
+    _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
+
+#define DEBUG_PP_CONCAT_(a, b) a##b
+#define DEBUG_PP_CONCAT(a, b) DEBUG_PP_CONCAT_(a, b)
+
+#define DEBUG_PP_FOREACH(f, ...) DEBUG_PP_FOREACH_(DEBUG_PP_NARG(__VA_ARGS__), f, __VA_ARGS__)
+#define DEBUG_PP_FOREACH_(N, f, ...) DEBUG_PP_FOREACH__(N, f, __VA_ARGS__)
+#define DEBUG_PP_FOREACH__(N, f, ...) DEBUG_PP_FOREACH_##N(f, __VA_ARGS__)
+#define DEBUG_PP_FOREACH_1(f, a) f(a)
+#define DEBUG_PP_FOREACH_2(f, a, b) f(a) f(b)
+#define DEBUG_PP_FOREACH_3(f, a, b, c) f(a) f(b) f(c)
+#define DEBUG_PP_FOREACH_4(f, a, b, c, d) f(a) f(b) f(c) f(d)
+#define DEBUG_PP_FOREACH_5(f, a, b, c, d, e) f(a) f(b) f(c) f(d) f(e)
+#define DEBUG_PP_FOREACH_6(f, a, b, c, d, e, g) f(a) f(b) f(c) f(d) f(e) f(g)
+#define DEBUG_PP_FOREACH_7(f, a, b, c, d, e, g, h) f(a) f(b) f(c) f(d) f(e) f(g) f(h)
+#define DEBUG_PP_FOREACH_8(f, a, b, c, d, e, g, h, i) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i)
+#define DEBUG_PP_FOREACH_9(f, a, b, c, d, e, g, h, i, j) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j)
+#define DEBUG_PP_FOREACH_10(f, a, b, c, d, e, g, h, i, j, k) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k)
+
+#define DEBUG_PP_EXPAND(...) DEBUG_PP_EXPAND_(__VA_ARGS__)
+#define DEBUG_PP_EXPAND_(...) __VA_ARGS__
+#define DEBUG_PP_UNWRAP_BRACE(...) DEBUG_PP_EXPAND(DEBUG_PP_UNWRAP_BRACE_ __VA_ARGS__)
+#define DEBUG_PP_UNWRAP_BRACE_(...) __VA_ARGS__
+
+#define DEBUG_REPR_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x ": "; formatter << x;
+#define DEBUG_REPR(...) \
+template <class debug_formatter> \
+void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter) const { \
+    formatter.os << DEBUG_TUPLE_BRACE[0]; \
+    bool add_comma = false; \
+    DEBUG_PP_FOREACH(DEBUG_REPR_ON_EACH, __VA_ARGS__) \
+    formatter.os << DEBUG_TUPLE_BRACE[1]; \
+}
+
+#define DEBUG_REPR_GLOBAL_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x ": "; formatter << object.x;
+#define DEBUG_REPR_GLOBAL(T, ...) \
+template <class debug_formatter> \
+void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter, T const &object) { \
+    formatter.os << DEBUG_TUPLE_BRACE[0]; \
+    bool add_comma = false; \
+    DEBUG_PP_FOREACH(DEBUG_REPR_GLOBAL_ON_EACH, __VA_ARGS__) \
+    formatter.os << DEBUG_TUPLE_BRACE[1]; \
+}
+
+#define DEBUG_REPR_GLOBAL_TEMPLATED(T, Tmpls, TmplsClassed, ...) \
+template <class debug_formatter, DEBUG_PP_UNWRAP_BRACE(TmplsClassed)> \
+void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter, T<DEBUG_PP_UNWRAP_BRACE(Tmpls)> const &object) { \
+    formatter.os << DEBUG_TUPLE_BRACE[0]; \
+    bool add_comma = false; \
+    DEBUG_PP_FOREACH(DEBUG_REPR_GLOBAL_ON_EACH, __VA_ARGS__) \
+    formatter.os << DEBUG_TUPLE_BRACE[1]; \
+}
 
 DEBUG_NAMESPACE_END
 
@@ -1572,7 +1716,20 @@ public:
     operator std::string() {
         return {};
     }
+
+    template <class T>
+    struct named_member_t {
+        const char *name;
+        T const &value;
+    };
+
+    template <class T>
+    named_member_t<T> named_member(const char *name, T const &value) {
+        return {name, value};
+    }
 };
+
+#define DEBUG_REPR(...)
 
 DEBUG_NAMESPACE_END
 

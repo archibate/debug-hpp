@@ -47,7 +47,15 @@ struct Student {
         return std::make_tuple(name, age);
     }
 
-    // alternatively return a string:
+    // alternatively, show in a format of {name: "name", age: 42}
+    auto repr() const {
+        return std::make_tuple(debug::named_member("name", name), debug::named_member("age", age));
+    }
+
+    // alternatively, let the macro provided by debug.hpp to generate a repr() method for you:
+    DEBUG_REPR(name, age);
+
+    // alternatively return a string directly:
     std::string repr() const {
         return "Student{name: " + name + " age: " + std::to_string(age) + "}";
     }
@@ -62,6 +70,9 @@ struct Student {
 inline auto repr(Student const &stu) {
     return std::make_tuple(name, age);
 }
+
+// global version for the DEBUG_REPR macro for generating repr as free function:
+DEBUG_REPR_GLOBAL(Student, name, age);
 ```
 
 > [!WARNING]

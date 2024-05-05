@@ -47,7 +47,15 @@ struct Student {
         return std::make_tuple(name, age);
     }
 
-    // 或者返回字符串：
+    // 或者，以 {name: "name", age: 42} 的格式输出:
+    auto repr() const {
+        return std::make_tuple(debug::named_member("name", name), debug::named_member("age", age));
+    }
+
+    // 或者，让 debug.hpp 提供的宏自动帮你生成一个 repr 函数:
+    DEBUG_REPR(name, age);
+
+    // 或者直接返回字符串：
     std::string repr() const {
         return "Student{name: " + name + " age: " + std::to_string(age) + "}";
     }
@@ -62,6 +70,9 @@ struct Student {
 inline auto repr(Student const &stu) {
     return std::make_tuple(name, age);
 }
+
+// 全局版的 DEBUG_REPR 宏，用于生成 repr 为全局函数
+DEBUG_REPR_GLOBAL(Student, name, age);
 ```
 
 > [!WARNING]

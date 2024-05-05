@@ -22,6 +22,28 @@
 #include <vector>
 #include <functional>
 
+struct Student {
+    std::string name;
+    int age;
+
+    DEBUG_REPR(name, age);
+};
+
+struct Student2 {
+    std::string name;
+    int age;
+};
+
+DEBUG_REPR_GLOBAL(Student2, name, age);
+
+template <class Name, class Age>
+struct Student3 {
+    Name name;
+    Age age;
+};
+
+DEBUG_REPR_GLOBAL_TEMPLATED(Student3, (Name, Age), (class Name, class Age), name, age);
+
 int main() {
     int i = 42;
     debug(), i;
@@ -116,6 +138,19 @@ int main() {
     float z6 = 3.14f;
     debug(), z6;
     debug().check(z6) > 3;
+
+    Student z7{"peng", 42};
+    debug(), z7;
+
+    Student2 z8{"peng", 42};
+    debug(), z8;
+
+    Student3<std::string, int> z9{"peng", 42};
+    debug(), z9;
+
+    debug::debug_formatter{std::cout} << z9 << " got answer " << 42;
+    std::cout << '\n';
+
     return 0;
 }
 
