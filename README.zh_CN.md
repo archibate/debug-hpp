@@ -49,7 +49,7 @@ struct Student {
 
     // 或者返回字符串：
     std::string repr() const {
-        return name + " " + std::to_string(age);
+        return "Student{name: " + name + " age: " + std::to_string(age) + "}";
     }
 
     // 返回 map 也可以，这里的 variant 将会被自动展开并打印:
@@ -58,9 +58,9 @@ struct Student {
     }
 };
 
-// 如果你添加不了成员函数，也可以在 Student 所在的同一命名空间中定义一个全局函数 repr（多亏了 C++ 的 ADL 机制）:
+// 如果你不方便成员函数，也可以在 Student 所在的同一命名空间中定义一个全局函数 repr（多亏了 C++ 的 ADL 机制）:
 inline std::string repr(Student const &stu) {
-    return stu.name + " " + std::to_string(stu.age);
+    return std::make_tuple(name, age);
 }
 ```
 
@@ -70,10 +70,10 @@ inline std::string repr(Student const &stu) {
 ## 🎁 输出保存为字符串
 
 ```cpp
-auto s = std::string(debug(), "my variable is", your_variable);
+auto s = std::string(debug(), "我的变量是", your_variable);
 // s 现在的内容: "your_file.cpp:233:  my variable is {1, 2, 3}"
 
-auto s = std::string(debug().noloc(), "my variable is", your_variable);
+auto s = std::string(debug().noloc(), "我的变量是", your_variable);
 // s 现在的内容: "my variable is {1, 2, 3}"
 ```
 

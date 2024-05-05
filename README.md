@@ -49,7 +49,7 @@ struct Student {
 
     // alternatively return a string:
     std::string repr() const {
-        return name + " " + std::to_string(age);
+        return "Student{name: " + name + " age: " + std::to_string(age) + "}";
     }
 
     // returning a map is also okay, the variant here will be automatically unwrapped and printed:
@@ -60,7 +60,7 @@ struct Student {
 
 // if adding member function is not possible, you may also define repr as free function within the same namespace as Student (thanks to C++'s ADL mechanism):
 inline std::string repr(Student const &stu) {
-    return stu.name + " " + std::to_string(stu.age);
+    return std::make_tuple(name, age);
 }
 ```
 
