@@ -44,9 +44,19 @@ struct Student3 {
 
 DEBUG_REPR_GLOBAL_TEMPLATED(Student3, (Name, Age), (class Name, class Age), name, age);
 
+struct Student4 {
+    DEBUG_REPR();
+};
+
+template <class T>
+void func(T const &t) {
+    static_assert(std::is_same<T, char[3]>::value, "T must be std::string");
+}
+
 int main() {
+    func("ki");
     int i = 42;
-    debug(), i;
+    debug(), "the answer:", i;
     std::vector<int> a{1, 2, 3, 4, 5};
     debug(), a;
     std::tuple<int, std::string> b{42, "answer"};
@@ -148,8 +158,11 @@ int main() {
     Student3<std::string, int> z9{"peng", 42};
     debug(), z9;
 
-    debug::debug_formatter{std::cout} << z9 << " got answer " << 42;
+    debug::debug_formatter{std::cout} << z9 << "got answer " << 42;
     std::cout << '\n';
+
+    Student4 z10;
+    debug(), z10;
 
     return 0;
 }

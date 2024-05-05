@@ -373,7 +373,7 @@ private:
                     auto f = oss.flags();
                     oss << "\\x" << std::hex << std::setfill('0')
                         << std::setw(2) << static_cast<int>(c)
-# if EBUG_HEXADECIMAL_UPPERCASE
+# if DEBUG_HEXADECIMAL_UPPERCASE
                         << std::uppercase
 # endif
                         ;
@@ -389,6 +389,12 @@ private:
         }
         oss << quote;
     }
+
+    template<class T>
+    struct debug_is_char_array : std::false_type {};
+     
+    template<std::size_t N>
+    struct debug_is_char_array<char[N]> : std::true_type {};
 
 # ifdef DEBUG_CUSTOM_DEMANGLE
     static std::string debug_demangle(char const *name) {
@@ -427,9 +433,10 @@ private:
     static void debug_format(std::ostream &oss, T const &t) {
         using std::begin;
         using std::end;
-        if constexpr ((std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
-                       std::is_convertible<T, std::string>::value) &&
-                      !std::is_same<T, char const *>::value) {
+        if constexpr ((debug_is_char_array<T>::value) {
+            oss << t;
+        } else if constexpr ((std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
+                       std::is_convertible<T, std::string>::value)) {
             if constexpr (!std::is_convertible<T, DEBUG_STRING_VIEW>::value) {
                 std::string s = t;
                 debug_quotes(oss, s, '"');
@@ -679,9 +686,9 @@ private:
       template <class T>    \
       struct debug_cond_##n : debug_bool_constant<__VA_ARGS__> {};
 
-    DEBUG_CON(string, std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
-                          std::is_convertible<T, std::string>::value &&
-                              !std::is_same<T, char const *>::value);
+    DEBUG_CON(string, (std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
+                          std::is_convertible<T, std::string>::value)
+              && !debug_is_char_array<T>::value);
     DEBUG_CON(bool, std::is_same<T, bool>::value);
     DEBUG_CON(char, std::is_same<T, char>::value ||
                         std::is_same<T, signed char>::value);
@@ -724,6 +731,14 @@ private:
             debug_format(oss,
                          reinterpret_cast<void const *>(std::addressof(t)));
             oss << DEBUG_UNKNOWN_TYPE_BRACE[1];
+        }
+    };
+
+    template <class T>
+    struct debug_format_trait<
+        T, typename std::enable_if<debug_is_char_array<T>::value>::type> {
+        void operator()(std::ostream &oss, T const &t) const {
+            oss << t;
         }
     };
 
@@ -1566,17 +1581,44 @@ public:
     }
 };
 
-#define DEBUG_PP_NARG(...) DEBUG_PP_NARG_(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
-#define DEBUG_PP_NARG_(...) DEBUG_PP_ARG_N(__VA_ARGS__)
-#define DEBUG_PP_ARG_N( \
-    _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
-
 #define DEBUG_PP_CONCAT_(a, b) a##b
 #define DEBUG_PP_CONCAT(a, b) DEBUG_PP_CONCAT_(a, b)
+
+#define DEBUG_PP_GET_1(a, ...) a
+#define DEBUG_PP_GET_2(a, b, ...) b
+#define DEBUG_PP_GET_3(a, b, c, ...) c
+#define DEBUG_PP_GET_4(a, b, c, d, ...) d
+#define DEBUG_PP_GET_5(a, b, c, d, e, ...) e
+#define DEBUG_PP_GET_6(a, b, c, d, e, f, ...) f
+#define DEBUG_PP_GET_7(a, b, c, d, e, f, g, ...) g
+#define DEBUG_PP_GET_8(a, b, c, d, e, f, g, h, ...) h
+#define DEBUG_PP_GET_9(a, b, c, d, e, f, g, h, i, ...) i
+#define DEBUG_PP_GET_10(a, b, c, d, e, f, g, h, i, j, ...) j
+
+#define DEBUG_PP_VA_EMPTY_(...) DEBUG_PP_GET_2(__VA_OPT__(,)0,1,)
+#define DEBUG_PP_VA_OPT_SUPPORT !DEBUG_PP_VA_EMPTY_
+
+#if DEBUG_PP_VA_OPT_SUPPORT(?)
+#define DEBUG_PP_VA_EMPTY(...) DEBUG_PP_VA_EMPTY_(__VA_ARGS__)
+#else
+#define DEBUG_PP_VA_EMPTY(...) 0
+#endif
+#define DEBUG_PP_IF(a, t, f) DEBUG_PP_IF_(a, t, f)
+#define DEBUG_PP_IF_(a, t, f) DEBUG_PP_IF__(a, t, f)
+#define DEBUG_PP_IF__(a, t, f) DEBUG_PP_IF___(DEBUG_PP_VA_EMPTY a, t, f)
+#define DEBUG_PP_IF___(a, t, f) DEBUG_PP_IF____(a, t, f)
+#define DEBUG_PP_IF____(a, t, f) DEBUG_PP_IF_##a(t, f)
+#define DEBUG_PP_IF_0(t, f) DEBUG_PP_UNWRAP_BRACE(f)
+#define DEBUG_PP_IF_1(t, f) DEBUG_PP_UNWRAP_BRACE(t)
+
+#define DEBUG_PP_NARG(...) DEBUG_PP_IF((__VA_ARGS__), (0), (DEBUG_PP_NARG_(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)))
+#define DEBUG_PP_NARG_(...) DEBUG_PP_NARG__(__VA_ARGS__)
+#define DEBUG_PP_NARG__(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
 
 #define DEBUG_PP_FOREACH(f, ...) DEBUG_PP_FOREACH_(DEBUG_PP_NARG(__VA_ARGS__), f, __VA_ARGS__)
 #define DEBUG_PP_FOREACH_(N, f, ...) DEBUG_PP_FOREACH__(N, f, __VA_ARGS__)
 #define DEBUG_PP_FOREACH__(N, f, ...) DEBUG_PP_FOREACH_##N(f, __VA_ARGS__)
+#define DEBUG_PP_FOREACH_0(f, ...)
 #define DEBUG_PP_FOREACH_1(f, a) f(a)
 #define DEBUG_PP_FOREACH_2(f, a, b) f(a) f(b)
 #define DEBUG_PP_FOREACH_3(f, a, b, c) f(a) f(b) f(c)
@@ -1590,7 +1632,8 @@ public:
 
 #define DEBUG_PP_EXPAND(...) DEBUG_PP_EXPAND_(__VA_ARGS__)
 #define DEBUG_PP_EXPAND_(...) __VA_ARGS__
-#define DEBUG_PP_UNWRAP_BRACE(...) DEBUG_PP_EXPAND(DEBUG_PP_UNWRAP_BRACE_ __VA_ARGS__)
+
+#define DEBUG_PP_UNWRAP_BRACE(...) DEBUG_PP_UNWRAP_BRACE_ __VA_ARGS__
 #define DEBUG_PP_UNWRAP_BRACE_(...) __VA_ARGS__
 
 #define DEBUG_REPR_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x ": "; formatter << x;
