@@ -1,0 +1,9 @@
+Fun fact: MSVC is not a standard conforming compiler, until you add these options:
+
+/DNOMINMAX
+/D_USE_MATH_DEFINES
+/utf-8
+/bigobj
+/Zc:preprocessor
+/permissive-
+/EHsc
