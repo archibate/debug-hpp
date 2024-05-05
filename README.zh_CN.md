@@ -14,6 +14,8 @@
 - 只需引入单个头文件 ✅
 - 线程安全 ✅
 
+[立即下载](http://142857.red/debug.hpp)
+
 ```bash
 curl -sOLf http://142857.red/debug.hpp
 ```
