@@ -108,8 +108,11 @@ int main() {
         }
     } z4{"peng", 42};
     debug(), z4;
-    auto z5 = static_cast<std::string>(debug(), "hello");
+    auto z5 = static_cast<std::string>(debug(), "hello", 42);
     std::cerr << z5 << '\n';
+    float z6 = 3.14f;
+    debug(), z6;
+    debug().check(z6) > 3;
     return 0;
 }
 
