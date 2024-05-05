@@ -4,7 +4,7 @@ Tired of the dumb debugging of manually traversing containers and `cout <<` them
 
 Try this handy header-only library 🚀 prints everything including STL containers without pain! 🤩
 
-[English](README.md) | [简体中文](README.zh_CN.md)
+[English](README.md) | [简体中文](README.zh_CN.md) | [Download now](https://raw.githubusercontent.com/archibate/debug-hpp/main/debug.hpp)
 
 - supports from C++11 to C++23 ✅
 - neat syntax, easy-to-use ✅
@@ -13,8 +13,6 @@ Try this handy header-only library 🚀 prints everything including STL containe
 - automatically disabled in Release build ✅
 - single header only ✅
 - thread safe ✅
-
-[Download now](https://raw.githubusercontent.com/archibate/debug-hpp/main/debug.hpp)
 
 ## 🎨 Usage
 

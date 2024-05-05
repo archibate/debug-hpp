@@ -4,7 +4,7 @@
 
 来试试这个单头文件库吧 🚀 无痛打印包括 STL 容器在内的任何对象！🤩
 
-[English](README.md) | [简体中文](README.zh_CN.md)
+[English](README.md) | [简体中文](README.zh_CN.md) | [立即下载](http://142857.red/debug.hpp)
 
 - 从 C++11 到 C++20 都能支持 ✅
 - 简洁的语法，易于使用 ✅
@@ -13,8 +13,6 @@
 - 在Release构建中自动禁用 ✅
 - 只需引入单个头文件 ✅
 - 线程安全 ✅
-
-[立即下载](http://142857.red/debug.hpp)
 
 ```bash
 curl -sOLf http://142857.red/debug.hpp
