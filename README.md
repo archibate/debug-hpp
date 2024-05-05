@@ -1,6 +1,6 @@
 # debug.hpp
 
-🥵 Tired of the dumb debugging of manually traversing containers and `cout <<` them one by one?
+Tired of the dumb debugging of manually traversing containers and `cout <<` them one by one? 🥵
 
 Try this handy header-only library 🚀 prints everything including STL containers without pain! 🤩
 
@@ -14,7 +14,7 @@ Try this handy header-only library 🚀 prints everything including STL containe
 - single header only ✅
 - thread safe ✅
 
-## Usage
+## 🎨 Usage
 
 ```cpp
 debug(), "my variable is", your_variable;
@@ -28,13 +28,14 @@ your_file.cpp:233:  my variable is {1, 2, 3}
 
 > suppose your_variable is an `std::vector`
 
-**WARNING**: debug() only works in `Debug` build! It is automatically disabled in `Release` build (we do this by checking whether the NDEBUG macro is defined). Yeah, completely no outputs in `Release` build, this is by design.
+> [!WARNING]
+> debug() only works in `Debug` build! It is automatically disabled in `Release` build (we do this by checking whether the NDEBUG macro is defined). Yeah, completely no outputs in `Release` build, this is by design.
 
 This is a feature for convenience: you don't have to busy removing all the debug() sentences after debug done, simply switch to `Release` build and everything debug is gone, no runtime overhead! And when you need debug simply switch back to `Debug` build and everything debug() you written before is back in life.
 
 If you mean to use debug() even in `Release` build, just `#define DEBUG_LEVEL 1` before including this header file to force enable debugging.
 
-## Printing custom classes
+## ✨ Printing custom classes
 
 ```cpp
 struct Student {
@@ -63,9 +64,10 @@ inline std::string repr(Student const &stu) {
 }
 ```
 
-**WARNING**: make sure you have the `const` qualifier! otherwise debug() will refuse to invoke the repr function.
+> [!WARNING]
+> make sure you have the `const` qualifier! otherwise debug() will refuse to invoke the repr function.
 
-## Save debug output as string
+## 🎁 Save debug output as string
 
 ```cpp
 auto s = std::string(debug(), "my variable is", your_variable);
@@ -75,14 +77,14 @@ auto s = std::string(debug().noloc(), "my variable is", your_variable);
 // content of `s`: "my variable is {1, 2, 3}"
 ```
 
-## Redirect debug output to spdlog
+## 📝 Redirect debug output to spdlog
 
 ```cpp
 #define DEBUG_OUTPUT(str) spdlog::info(x)  // define this macro before including the header to customize where debug() output its result
 #include "debug.hpp"
 ```
 
-## Assertion check
+## 🚩 Assertion check
 
 ```cpp
 debug().check(some_variable) > 0;
@@ -93,7 +95,7 @@ Will trigger a 'trap' interrupt (__debugbreak for MSVC and __builtin_trap for GC
 your_file.cpp:233:  assertion failed: 3 < 0
 ```
 
-## Release build
+## 🌠 Release build
 
 After debugging complete, no need to busy removing all debug() calls! Simply:
 ```cpp
@@ -101,7 +103,7 @@ After debugging complete, no need to busy removing all debug() calls! Simply:
 ```
 would supress all debug() prints and assertion checks, completely no runtime overhead. For CMake or Visual Studio users, simply switch to `Release` build would supress debug() prints. Since they automatically define `NDEBUG` for you in `Release`, `RelWithDebInfo` and `MinSizeRel` build types.
 
-## Tested compilers
+## 😏 Tested compilers
 
 - x86-64 gcc 4.8.1 (-std=c++11)
 - x86-64 gcc 13.2 (-std=c++20)
@@ -119,7 +121,7 @@ would supress all debug() prints and assertion checks, completely no runtime ove
 
 See https://godbolt.org/z/jYdj4T44n
 
-## To conclude
+## 😉 To conclude
 
 TL;DR: This is a useful debugging utility the C++ programmers had all dreamed of:
 
@@ -131,7 +133,7 @@ TL;DR: This is a useful debugging utility the C++ programmers had all dreamed of
 6. when debug done, supress all debug messages by simply `#define NDEBUG`, the whole library is disabled at compile-time, no runtime overhead
 7. Thread safe, every line of message is always distinct, no annoying interleaving output rushing into console (typical experience when using cout)
 
-## Configurations
+## 😜 Configurations
 
 Here is a list of configurable macros, define them **before** including this header file to take effect:
 
@@ -186,6 +188,6 @@ Here is a list of configurable macros, define them **before** including this hea
 
 * `#define DEBUG_CLASS_NAME debug` (default) - the default name for the debug class is `debug()`, you may define your custom name here
 
-## Questions?
+## 💝 Questions?
 
 What's your opinion for this handy printing utility? Any suggestions or feature request would be welcome in the [GitHub issues](https://github.com/archibate/debug-hpp/issues)!
