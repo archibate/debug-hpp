@@ -95,6 +95,9 @@ Will trigger a 'trap' interrupt (__debugbreak for MSVC and __builtin_trap for GC
 your_file.cpp:233:  assertion failed: 3 < 0
 ```
 
+> [!TIP]
+> See [test.cpp](test.cpp) for more usage showcases.
+
 ## 🌠 Release build
 
 After debugging complete, no need to busy removing all debug() calls! Simply:

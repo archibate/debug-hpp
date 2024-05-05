@@ -96,6 +96,9 @@ debug().check(some_variable) > 0;
 your_file.cpp:233:  assertion failed: 3 < 0
 ```
 
+> [!TIP]
+> 更多详细用法举例可以看 [test.cpp](test.cpp)。
+
 ## 🌠 Release 模式
 
 调试完成后，无需手忙脚乱地删除所有debug()！只需:
