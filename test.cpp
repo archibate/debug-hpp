@@ -45,7 +45,9 @@ struct Student3 {
 DEBUG_REPR_GLOBAL_TEMPLATED(Student3, (Name, Age), (class Name, class Age), name, age);
 
 struct Student4 {
+#if DEBUG_PP_VA_OPT_SUPPORT(?)
     DEBUG_REPR();
+#endif
 };
 
 template <class T>
@@ -158,8 +160,7 @@ int main() {
     Student3<std::string, int> z9{"peng", 42};
     debug(), z9;
 
-    debug::debug_formatter{std::cout} << z9 << "got answer " << 42;
-    std::cout << '\n';
+    debug::debug_formatter{std::cout} << z9 << " got answer " << 42 << "\n";
 
     Student4 z10;
     debug(), z10;

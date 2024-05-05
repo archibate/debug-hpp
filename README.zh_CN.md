@@ -60,9 +60,9 @@ struct Student {
         return "Student{name: " + name + " age: " + std::to_string(age) + "}";
     }
 
-    // 返回 map 也可以，这里的 variant 将会被自动展开并打印:
-    auto repr() const {
-        return std::map<std::string>, std::variant<std::string, int>>({"name", name}, {"age", age});
+    // 或者直接 << 到输出流：
+    void repr(std::ostream &os) const {
+        os << "Student{name: " << name << " age: " << age << "}";
     }
 };
 
@@ -71,12 +71,18 @@ inline auto repr(Student const &stu) {
     return std::make_tuple(name, age);
 }
 
-// 全局版的 DEBUG_REPR 宏，用于生成 repr 为全局函数
+// 全局版的 DEBUG_REPR 宏，用于生成 repr 为全局函数:
 DEBUG_REPR_GLOBAL(Student, name, age);
+
+// 如果你的类很不幸是个模板类同时又不得不定义 repr 为全局函数...
+DEBUG_REPR_GLOBAL_TEMPLATED(std::pair, (T1, T2), (class T1, class T2), name, age);
 ```
 
 > [!WARNING]
 > repr 必须加上 const 限定符！否则 debug() 将无法正常调用 repr 函数。
+
+> [!WARNING]
+> 如果你是MSVC用户，你必须开启 `/Zc:preprocessor` 编译选项才能正常使用 `DEBUG_REPR` 系列宏！否则MSVC会报错。这是MSVC一个远近闻名的bug，不是我们的错。
 
 ## 🎁 输出保存为字符串
 

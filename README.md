@@ -60,9 +60,9 @@ struct Student {
         return "Student{name: " + name + " age: " + std::to_string(age) + "}";
     }
 
-    // returning a map is also okay, the variant here will be automatically unwrapped and printed:
-    auto repr() const {
-        return std::map<std::string>, std::variant<std::string, int>>({"name", name}, {"age", age});
+    // alternatively << to ostream directly:
+    void repr(std::ostream &os) const {
+        os << "Student{name: " << name << " age: " << age << "}";
     }
 };
 
@@ -73,10 +73,16 @@ inline auto repr(Student const &stu) {
 
 // global version for the DEBUG_REPR macro for generating repr as free function:
 DEBUG_REPR_GLOBAL(Student, name, age);
+
+// if your class was a template class while you have to define repr as free function...
+DEBUG_REPR_GLOBAL_TEMPLATED(std::pair, (T1, T2), (class T1, class T2), name, age);
 ```
 
 > [!WARNING]
 > make sure you have the `const` qualifier! otherwise debug() will refuse to invoke the repr function.
+
+> [!WARNING]
+> For MSVC users: Please turn on `/Zc:preprocessor` before you could the `DEBUG_REPR` macros! This is a famous MSVC bug, not our fault.
 
 ## 🎁 Save debug output as string
 

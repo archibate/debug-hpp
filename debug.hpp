@@ -433,7 +433,7 @@ private:
     static void debug_format(std::ostream &oss, T const &t) {
         using std::begin;
         using std::end;
-        if constexpr ((debug_is_char_array<T>::value) {
+        if constexpr (debug_is_char_array<T>::value) {
             oss << t;
         } else if constexpr ((std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
                        std::is_convertible<T, std::string>::value)) {
@@ -686,9 +686,8 @@ private:
       template <class T>    \
       struct debug_cond_##n : debug_bool_constant<__VA_ARGS__> {};
 
-    DEBUG_CON(string, (std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
-                          std::is_convertible<T, std::string>::value)
-              && !debug_is_char_array<T>::value);
+    DEBUG_CON(string, std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
+          std::is_convertible<T, std::string>::value);
     DEBUG_CON(bool, std::is_same<T, bool>::value);
     DEBUG_CON(char, std::is_same<T, char>::value ||
                         std::is_same<T, signed char>::value);
@@ -755,7 +754,7 @@ private:
 
     template <class T>
     struct debug_format_trait<
-        T, typename std::enable_if<
+        T, typename std::enable_if<!debug_is_char_array<T>::value &&
                debug_cond_string<T>::value &&
                std::is_convertible<T, DEBUG_STRING_VIEW>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
@@ -765,7 +764,7 @@ private:
 
     template <class T>
     struct debug_format_trait<
-        T, typename std::enable_if<!debug_cond_string<T>::value &&
+        T, typename std::enable_if<!debug_is_char_array<T>::value &&!debug_cond_string<T>::value &&
                                    debug_cond_bool<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
             auto f = oss.flags();
@@ -776,7 +775,7 @@ private:
 
     template <class T>
     struct debug_format_trait<
-        T, typename std::enable_if<!debug_cond_string<T>::value &&
+        T, typename std::enable_if<!debug_is_char_array<T>::value &&!debug_cond_string<T>::value &&
                                    !debug_cond_bool<T>::value &&
                                    debug_cond_char<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
@@ -786,7 +785,7 @@ private:
 
     template <class T>
     struct debug_format_trait<
-        T, typename std::enable_if<!debug_cond_string<T>::value &&
+        T, typename std::enable_if<!debug_is_char_array<T>::value &&!debug_cond_string<T>::value &&
                                    !debug_cond_bool<T>::value &&
                                    !debug_cond_char<T>::value &&
                                    debug_cond_unicode_char<T>::value>::type> {
@@ -806,7 +805,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             debug_cond_integral_unsigned<T>::value>::type> {
@@ -829,7 +828,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
@@ -843,7 +842,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
@@ -860,7 +859,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
@@ -906,7 +905,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
@@ -922,7 +921,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
@@ -952,7 +951,7 @@ private:
     template <class T>
     struct debug_format_trait<
         T,
-        typename std::enable_if<
+        typename std::enable_if<!debug_is_char_array<T>::value &&
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
@@ -1581,6 +1580,13 @@ public:
     }
 };
 
+#if defined(_MSC_VER) && (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
+#define DEBUG_REPR(...) __pragma(message("Please turn on /Zc:preprocessor before using DEBUG_REPR!"))
+#define DEBUG_REPR_GLOBAL(...) __pragma(message("Please turn on /Zc:preprocessor before using DEBUG_REPR!"))
+#define DEBUG_REPR_GLOBAL_TEMPLATED(...) __pragma(message("Please turn on /Zc:preprocessor before using DEBUG_REPR!"))
+#define DEBUG_PP_VA_OPT_SUPPORT(...) 0
+#else
+
 #define DEBUG_PP_CONCAT_(a, b) a##b
 #define DEBUG_PP_CONCAT(a, b) DEBUG_PP_CONCAT_(a, b)
 
@@ -1596,7 +1602,7 @@ public:
 #define DEBUG_PP_GET_10(a, b, c, d, e, f, g, h, i, j, ...) j
 
 #define DEBUG_PP_VA_EMPTY_(...) DEBUG_PP_GET_2(__VA_OPT__(,)0,1,)
-#define DEBUG_PP_VA_OPT_SUPPORT !DEBUG_PP_VA_EMPTY_
+#define DEBUG_PP_VA_OPT_SUPPORT ! DEBUG_PP_VA_EMPTY_
 
 #if DEBUG_PP_VA_OPT_SUPPORT(?)
 #define DEBUG_PP_VA_EMPTY(...) DEBUG_PP_VA_EMPTY_(__VA_ARGS__)
@@ -1664,6 +1670,8 @@ void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter, T<DEBUG_PP_UNWRAP_BRAC
     DEBUG_PP_FOREACH(DEBUG_REPR_GLOBAL_ON_EACH, __VA_ARGS__) \
     formatter.os << DEBUG_TUPLE_BRACE[1]; \
 }
+
+#endif
 
 DEBUG_NAMESPACE_END
 
