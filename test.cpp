@@ -43,21 +43,21 @@ int main() {
     debug(), h;
     std::shared_ptr<int> j(new int(42));
 #if __cplusplus >= 201703L
-#ifdef __cpp_lib_optional
+# ifdef __cpp_lib_optional
     debug(), j;
     std::optional<int> k = 42;
     debug(), k;
     std::optional<int> l = std::nullopt;
     debug(), l;
-#endif
-#ifdef __cpp_lib_variant
+# endif
+# ifdef __cpp_lib_variant
     std::variant<int, std::string> m = "hello";
     debug(), m;
-#endif
-#ifdef __cpp_lib_string_view
+# endif
+# ifdef __cpp_lib_string_view
     std::string_view n = "hello";
     debug(), n;
-#endif
+# endif
 #endif
     struct Test {};
 
@@ -79,10 +79,10 @@ int main() {
     char16_t v = 42;
     debug(), v;
 #if __cplusplus >= 202002L
-#ifdef __cpp_char8_t
+# ifdef __cpp_char8_t
     char8_t w = 42;
     debug(), w;
-#endif
+# endif
 #endif
     wchar_t x = L'*';
     debug(), x;
@@ -91,22 +91,25 @@ int main() {
     std::vector<char> z = {'h', 'e', 'l', 'l', 'o'};
     debug(), z;
 #if __cplusplus >= 202002L
-#ifdef __cpp_lib_span
+# ifdef __cpp_lib_span
     std::span<char> z1 = z;
     debug(), z1;
-#endif
+# endif
 #endif
     std::chrono::nanoseconds z2(42);
     debug(), z2;
     auto z3 = std::chrono::system_clock::now();
     debug(), z3;
+
     struct Baby {
         std::string name;
         int age;
+
         auto repr() const -> decltype(std::make_tuple(name, age)) {
             return std::make_tuple(name, age);
         }
     } z4{"peng", 42};
+
     debug(), z4;
     auto z5 = static_cast<std::string>(debug(), "hello", 42);
     std::cerr << z5 << '\n';
