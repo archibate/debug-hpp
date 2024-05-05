@@ -70,10 +70,10 @@ inline auto repr(Student const &stu) {
 ## 🎁 输出保存为字符串
 
 ```cpp
-auto s = std::string(debug(), "我的变量是", your_variable);
+auto s = static_cast<std::string>(debug(), "我的变量是", your_variable);
 // s 现在的内容: "your_file.cpp:233:  my variable is {1, 2, 3}"
 
-auto s = std::string(debug().noloc(), "我的变量是", your_variable);
+auto s = static_cast<std::string>(debug().noloc(), "我的变量是", your_variable);
 // s 现在的内容: "my variable is {1, 2, 3}"
 ```
 

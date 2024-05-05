@@ -108,11 +108,16 @@ int main() {
         }
     } z4{"peng", 42};
     debug(), z4;
+    auto z5 = static_cast<std::string>(debug(), "hello");
+    std::cerr << z5 << '\n';
     return 0;
 }
 
-// g++ -std=c++11 test.cpp -I .
-// g++ -std=c++14 test.cpp -I .
-// g++ -std=c++17 test.cpp -I .
-// g++ -std=c++20 test.cpp -I .
-// cat debug.hpp test.cpp | sed '/\#pragma once\|\#include "debug\.hpp"/d' | xsel -ib
+/*
+g++ -std=c++11 test.cpp -I .
+g++ -std=c++14 test.cpp -I .
+g++ -std=c++17 test.cpp -I .
+g++ -std=c++20 test.cpp -I .
+cat debug.hpp test.cpp | sed '/\#pragma once\|\#include "debug\.hpp"/d' | xsel -ib
+scp debug.hpp root@142857.red:/root/142857.red
+*/

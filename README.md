@@ -70,10 +70,10 @@ inline auto repr(Student const &stu) {
 ## 🎁 Save debug output as string
 
 ```cpp
-auto s = std::string(debug(), "my variable is", your_variable);
+auto s = static_cast<std::string>(debug(), "my variable is", your_variable);
 // content of `s`: "your_file.cpp:233:  my variable is {1, 2, 3}"
 
-auto s = std::string(debug().noloc(), "my variable is", your_variable);
+auto s = static_cast<std::string>(debug().noloc(), "my variable is", your_variable);
 // content of `s`: "my variable is {1, 2, 3}"
 ```
 
