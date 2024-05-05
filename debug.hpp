@@ -225,21 +225,25 @@
 #  include <unordered_map>
 # endif
 # ifndef DEBUG_SOURCE_LOCATION
-#  if defined(__has_include)
-#   if __has_include(<source_location>)
-#    include <source_location>
-#    if __cpp_lib_source_location
-#     define DEBUG_SOURCE_LOCATION std::source_location
+#  if __cplusplus >= 202002L
+#   if defined(__has_include)
+#    if __has_include(<source_location>)
+#     include <source_location>
+#     if __cpp_lib_source_location
+#      define DEBUG_SOURCE_LOCATION std::source_location
+#     endif
 #    endif
 #   endif
 #  endif
 # endif
 # ifndef DEBUG_SOURCE_LOCATION
-#  if defined(__has_include)
-#   if __has_include(<experimental/source_location>)
-#    include <experimental/source_location>
-#    if __cpp_lib_experimental_source_location
-#     define DEBUG_SOURCE_LOCATION std::experimental::source_location
+#  if __cplusplus >= 201505L
+#   if defined(__has_include)
+#    if __has_include(<experimental/source_location>)
+#     include <experimental/source_location>
+#     if __cpp_lib_experimental_source_location
+#      define DEBUG_SOURCE_LOCATION std::experimental::source_location
+#     endif
 #    endif
 #   endif
 #  endif
@@ -264,20 +268,12 @@
 # endif
 # ifndef DEBUG_STRING_VIEW
 #  if defined(__has_include)
-#   if __has_include(<string_view>)
-#    include <string_view>
-#    if __cpp_lib_string_view
-#     define DEBUG_STRING_VIEW std::string_view
-#    endif
-#   endif
-#  endif
-# endif
-# ifndef DEBUG_STRING_VIEW
-#  if defined(__has_include)
-#   if __has_include(<experimental/string_view>)
-#    include <experimental/string_view>
-#    if __cpp_lib_experimental_string_view
-#     define DEBUG_STRING_VIEW std::experimental::string_view
+#   if __cplusplus >= 201703L
+#    if __has_include(<string_view>)
+#     include <string_view>
+#     if __cpp_lib_string_view
+#      define DEBUG_STRING_VIEW std::string_view
+#     endif
 #    endif
 #   endif
 #  endif
@@ -286,18 +282,30 @@
 #  include <string>
 #  define DEBUG_STRING_VIEW std::string
 # endif
-# if defined(__has_cpp_attribute)
-#  if __has_cpp_attribute(unlikely)
-#   define DEBUG_UNLIKELY [[unlikely]]
+# if __cplusplus >= 202002L
+#  if defined(__has_cpp_attribute)
+#   if __has_cpp_attribute(unlikely)
+#    define DEBUG_UNLIKELY [[unlikely]]
+#   else
+#    define DEBUG_UNLIKELY
+#   endif
+#   if __has_cpp_attribute(likely)
+#    define DEBUG_LIKELY [[likely]]
+#   else
+#    define DEBUG_LIKELY
+#   endif
+#   if __has_cpp_attribute(nodiscard)
+#    define DEBUG_NODISCARD [[nodiscard]]
+#   else
+#    define DEBUG_NODISCARD
+#   endif
 #  else
+#   define DEBUG_LIKELY
 #   define DEBUG_UNLIKELY
-#  endif
-#  if __has_cpp_attribute(nodiscard)
-#   define DEBUG_NODISCARD [[nodiscard]]
-#  else
 #   define DEBUG_NODISCARD
 #  endif
 # else
+#  define DEBUG_LIKELY
 #  define DEBUG_UNLIKELY
 #  define DEBUG_NODISCARD
 # endif
@@ -454,19 +462,21 @@ private:
                 }
                 oss.flags(f);
             } else {
-                oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
+                oss << static_cast<std::uint64_t>(
+                    static_cast<typename std::make_unsigned<T>::type>(t));
             }
 #  else
         } else if constexpr (std::is_integral<T>::value) {
-            oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
+            oss << static_cast<std::uint64_t>(
+                static_cast<typename std::make_unsigned<T>::type>(t));
 #  endif
         } else if constexpr (std::is_floating_point<T>::value) {
             auto f = oss.flags();
             oss << std::fixed
                 << std::setprecision(std::numeric_limits<T>::digits10) << t;
             oss.flags(f);
-        } else if constexpr (requires (T const &t) {
-                                static_cast<void const volatile *>(t.get());
+        } else if constexpr (requires(T const &t) {
+                                 static_cast<void const volatile *>(t.get());
                              }) {
             auto const *p = t.get();
             if (p != nullptr) {
@@ -505,7 +515,7 @@ private:
                              }) {
             oss << t;
         } else if constexpr (std::is_pointer<T>::value ||
-                             std::is_null_pointer<T>::value) {
+                             std::is_same<T, std::nullptr_t>::value) {
             if (t == nullptr) {
                 auto f = oss.flags();
                 oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
@@ -569,8 +579,8 @@ private:
                                  DEBUG_REPR_NAME(oss, t);
                              }) {
             DEBUG_REPR_NAME(oss, t);
-        } else if constexpr (requires(T const &t) {
-                                 visit([&oss](auto const &) {}, t);
+        } else if constexpr (requires(bool &b, T const &t) {
+                                 b = holds_alternative(t);
                              }) {
             visit([&oss](auto const &t) { debug_format(oss, t); }, t);
         } else if constexpr (requires(T const &t) {
@@ -633,9 +643,10 @@ private:
         void operator()(T const &) const {}
     };
 
-    DEBUG_COND(is_variant, visit(std::declval<variant_test_lambda const &>(),
-                                 std::declval<T const &>()));
-    DEBUG_COND(is_smart_pointer, static_cast<void const volatile *>(std::declval<T const &>().get()));
+    DEBUG_COND(is_variant, std::declval<bool &>() =
+                               holds_alternative(std::declval<T const &>()));
+    DEBUG_COND(is_smart_pointer, static_cast<void const volatile *>(
+                                     std::declval<T const &>().get()));
     DEBUG_COND(is_optional, (((void)*std::declval<T const &>(), (void)0),
                              ((void)(bool)std::declval<T const &>(), (void)0)));
 
@@ -660,14 +671,15 @@ private:
                                 std::is_same<T, wchar_t>::value);
 #  endif
 #  if DEBUG_UNSIGNED_AS_HEXADECIMAL
-    DEBUG_CON(integral_unsigned, std::is_integral<T>::value && std::is_unsigned<T>::value);
+    DEBUG_CON(integral_unsigned,
+              std::is_integral<T>::value &&std::is_unsigned<T>::value);
 #  else
     DEBUG_CON(integral_unsigned, false);
 #  endif
     DEBUG_CON(integral, std::is_integral<T>::value);
     DEBUG_CON(floating_point, std::is_floating_point<T>::value);
-    DEBUG_CON(pointer,
-              std::is_pointer<T>::value || std::is_null_pointer<T>::value);
+    DEBUG_CON(pointer, std::is_pointer<T>::value ||
+                           std::is_same<T, std::nullptr_t>::value);
     DEBUG_CON(enum, std::is_enum<T>::value);
     DEBUG_CON(type_info, std::is_same<T, std::type_info>::value);
 
@@ -768,7 +780,8 @@ private:
                 << std::uppercase
 #  endif
                 ;
-            oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
+            oss << static_cast<std::uint64_t>(
+                static_cast<typename std::make_unsigned<T>::type>(t));
             oss.flags(f);
         }
     };
@@ -782,7 +795,8 @@ private:
             !debug_cond_integral_unsigned<T>::value &&
             debug_cond_integral<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-            oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
+            oss << static_cast<std::uint64_t>(
+                static_cast<typename std::make_unsigned<T>::type>(t));
         }
     };
 
@@ -966,17 +980,18 @@ private:
         std::ostream &oss;
         bool &add_comma;
 
+        template <class Arg>
+        void call(Arg &&arg) const {
+            if (add_comma) {
+                oss << DEBUG_TUPLE_COMMA;
+            }
+            add_comma = true;
+            debug_format(oss, std::forward<decltype(arg)>(arg));
+        }
+
         template <class... Args>
         void operator()(Args &&...args) const {
-            int unused[] = {(
-                [&] {
-                    if (add_comma) {
-                        oss << DEBUG_TUPLE_COMMA;
-                    }
-                    add_comma = true;
-                    debug_format(oss, std::forward<decltype(args)>(args));
-                }(),
-                0)...};
+            int unused[] = {(call<Args>(std::forward<Args>(args)), 0)...};
             (void)unused;
         }
     };
@@ -1051,7 +1066,7 @@ private:
             !debug_cond_is_tuple<T>::value && !debug_cond_enum<T>::value &&
             debug_cond_is_member_repr<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-            oss << t.DEBUG_REPR_NAME();
+            debug_format(oss, t.DEBUG_REPR_NAME());
         }
     };
 
@@ -1092,7 +1107,7 @@ private:
             !debug_cond_is_member_repr_stream<T>::value &&
             debug_cond_is_adl_repr<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-            oss << DEBUG_REPR_NAME(t);
+            debug_format(oss, DEBUG_REPR_NAME(t));
         }
     };
 
@@ -1208,32 +1223,38 @@ private:
                 fileCache;
             auto key = std::to_string(loc.line()) + loc.file_name();
             if (auto it = fileCache.find(key);
-                it != fileCache.end() && !it->second.empty()) [[likely]] {
-                oss << DEBUG_SOURCE_LINE_BRACE[0] << it->second
-                    << DEBUG_SOURCE_LINE_BRACE[1];
-            } else if (auto file = std::ifstream(loc.file_name());
-                       file.is_open()) [[likely]] {
-                std::string line;
-                for (int i = 0; i < loc.line(); ++i) {
-                    if (!std::getline(file, line))
-                        DEBUG_UNLIKELY {
-                            line.clear();
-                            break;
-                        }
-                }
-                if (auto pos = line.find_first_not_of(" \t\r\n");
-                    pos != line.npos) [[likely]] {
-                    line = line.substr(pos);
-                }
-                if (!line.empty()) [[likely]] {
-                    if (line.back() == ';') [[likely]] {
-                        line.pop_back();
-                    }
-                    oss << DEBUG_SOURCE_LINE_BRACE[0] << line
+                it != fileCache.end() && !it->second.empty())
+                DEBUG_LIKELY {
+                    oss << DEBUG_SOURCE_LINE_BRACE[0] << it->second
                         << DEBUG_SOURCE_LINE_BRACE[1];
                 }
-                fileCache.try_emplace(key, std::move(line));
-            } else {
+            else if (auto file = std::ifstream(loc.file_name()); file.is_open())
+                DEBUG_LIKELY {
+                    std::string line;
+                    for (int i = 0; i < loc.line(); ++i) {
+                        if (!std::getline(file, line))
+                            DEBUG_UNLIKELY {
+                                line.clear();
+                                break;
+                            }
+                    }
+                    if (auto pos = line.find_first_not_of(" \t\r\n");
+                        pos != line.npos)
+                        DEBUG_LIKELY {
+                            line = line.substr(pos);
+                        }
+                    if (!line.empty())
+                        DEBUG_LIKELY {
+                            if (line.back() == ';')
+                                DEBUG_LIKELY {
+                                    line.pop_back();
+                                }
+                            oss << DEBUG_SOURCE_LINE_BRACE[0] << line
+                                << DEBUG_SOURCE_LINE_BRACE[1];
+                        }
+                    fileCache.try_emplace(key, std::move(line));
+                }
+            else {
                 oss << DEBUG_SOURCE_LINE_BRACE[0] << '?'
                     << DEBUG_SOURCE_LINE_BRACE[1];
                 fileCache.try_emplace(key);
@@ -1389,9 +1410,10 @@ public:
     }
 
     debug &on(bool enable) {
-        if (!enable) [[likely]] {
-            state = supress;
-        }
+        if (!enable)
+            DEBUG_LIKELY {
+                state = supress;
+            }
         return *this;
     }
 
@@ -1460,7 +1482,7 @@ DEBUG_NAMESPACE_END
 
 #else
 
-#include <string>
+# include <string>
 
 DEBUG_NAMESPACE_BEGIN
 

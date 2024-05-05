@@ -102,9 +102,27 @@ your_file.cpp:233:  assertion failed: 3 < 0
 ```
 就可以抑制所有debug()输出和断言检查，完全没有运行时开销。对于CMake或Visual Studio用户，只需切换到`Release`版本即可抑制debug()输出。因为它们会在`Release`、`RelWithDebInfo`和`MinSizeRel`构建类型中自动为您定义`NDEBUG`。
 
+## 经过测试的编译器
+
+- x86-64 gcc 4.8.1 (-std=c++11)
+- x86-64 gcc 13.2 (-std=c++20)
+- x86-64 gcc 9.1 (-std=c++11)
+- x86-64 gcc 13.2 (-std=c++14)
+- x86-64 gcc 9.1 (-std=c++17)
+- x86-64 clang 6.0.0 (-std=c++11 -stdlib=libc++)
+- armv7-a clang 9.0.0 (-std=c++11)
+- armv8-a clang 18.1.0 (-std=c++23)
+- x64 msvc v19.38 (/std:c++20)
+- arm64 msvc v19.38 (/std:c++14)
+- x64 msvc v19.31 (/std:c++17)
+- x86 msvc v19.14 (/std:c++11)
+- x64 msvc v19.latest (/std:c++latest)
+
+详见 https://godbolt.org/z/jYdj4T44n
+
 ## 总结
 
-总之，这是C++程序员都梦寐以求的一个有用的调试工具:
+总之，这是一个C++程序员都梦寐以求的实用调试工具:
 
 1. 使用简洁的逗号语法打印，易于使用
 2. 支持打印STL对象，包括string、vector、tuple、optional、variant、unique_ptr、type_info等

@@ -1,11 +1,23 @@
 #include "debug.hpp"
 #include <map>
+#include <set>
 #include <chrono>
 #include <memory>
-#include <variant>
-#include <optional>
-#include <set>
-#include <span>
+#if __cplusplus >= 201703L
+# ifdef __has_include
+#  if __has_include(<variant>)
+#   include <variant>
+#  endif
+#  if __has_include(<optional>)
+#   include <optional>
+#  endif
+#  if __cplusplus >= 202002L
+#   if __has_include(<span>)
+#    include <span>
+#   endif
+#  endif
+# endif
+#endif
 #include <string>
 #include <vector>
 #include <functional>
@@ -30,25 +42,29 @@ int main() {
     std::unique_ptr<int> h = nullptr;
     debug(), h;
     std::shared_ptr<int> j(new int(42));
-#if __cpp_lib_optional
+#if __cplusplus >= 201703L
+#ifdef __cpp_lib_optional
     debug(), j;
     std::optional<int> k = 42;
     debug(), k;
     std::optional<int> l = std::nullopt;
     debug(), l;
 #endif
-#if __cpp_lib_variant
+#ifdef __cpp_lib_variant
     std::variant<int, std::string> m = "hello";
     debug(), m;
 #endif
-#if __cpp_lib_string_view
+#ifdef __cpp_lib_string_view
     std::string_view n = "hello";
     debug(), n;
 #endif
+#endif
     struct Test {};
+
     Test o;
     debug(), o;
-    std::function<void()> p = [] {};
+    std::function<void()> p = [] {
+    };
     debug(), p;
     std::u32string q = U"hello";
     debug(), q;
@@ -62,9 +78,11 @@ int main() {
     debug(), u;
     char16_t v = 42;
     debug(), v;
-#if __cpp_char8_t
+#if __cplusplus >= 202002L
+#ifdef __cpp_char8_t
     char8_t w = 42;
     debug(), w;
+#endif
 #endif
     wchar_t x = L'*';
     debug(), x;
@@ -72,14 +90,24 @@ int main() {
     debug(), y;
     std::vector<char> z = {'h', 'e', 'l', 'l', 'o'};
     debug(), z;
-#if __cpp_lib_span
+#if __cplusplus >= 202002L
+#ifdef __cpp_lib_span
     std::span<char> z1 = z;
     debug(), z1;
+#endif
 #endif
     std::chrono::nanoseconds z2(42);
     debug(), z2;
     auto z3 = std::chrono::system_clock::now();
     debug(), z3;
+    struct Baby {
+        std::string name;
+        int age;
+        auto repr() const -> decltype(std::make_tuple(name, age)) {
+            return std::make_tuple(name, age);
+        }
+    } z4{"peng", 42};
+    debug(), z4;
     return 0;
 }
 
@@ -87,3 +115,4 @@ int main() {
 // g++ -std=c++14 test.cpp -I .
 // g++ -std=c++17 test.cpp -I .
 // g++ -std=c++20 test.cpp -I .
+// cat debug.hpp test.cpp | sed '/\#pragma once\|\#include "debug\.hpp"/d' | xsel -ib

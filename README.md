@@ -6,7 +6,7 @@ Try this handy header-only library 🚀 prints everything including STL containe
 
 [English](README.md) | [简体中文](README.zh_CN.md)
 
-- supports from C++11 to C++20 ✅
+- supports from C++11 to C++23 ✅
 - neat syntax, easy-to-use ✅
 - print almost all STL containers ✅
 - custom class supported ✅
@@ -100,6 +100,24 @@ After debugging complete, no need to busy removing all debug() calls! Simply:
 #define NDEBUG
 ```
 would supress all debug() prints and assertion checks, completely no runtime overhead. For CMake or Visual Studio users, simply switch to `Release` build would supress debug() prints. Since they automatically define `NDEBUG` for you in `Release`, `RelWithDebInfo` and `MinSizeRel` build types.
+
+## Tested compilers
+
+- x86-64 gcc 4.8.1 (-std=c++11)
+- x86-64 gcc 13.2 (-std=c++20)
+- x86-64 gcc 9.1 (-std=c++11)
+- x86-64 gcc 13.2 (-std=c++14)
+- x86-64 gcc 9.1 (-std=c++17)
+- x86-64 clang 6.0.0 (-std=c++11 -stdlib=libc++)
+- armv7-a clang 9.0.0 (-std=c++11)
+- armv8-a clang 18.1.0 (-std=c++23)
+- x64 msvc v19.38 (/std:c++20)
+- arm64 msvc v19.38 (/std:c++14)
+- x64 msvc v19.31 (/std:c++17)
+- x86 msvc v19.14 (/std:c++11)
+- x64 msvc v19.latest (/std:c++latest)
+
+See https://godbolt.org/z/jYdj4T44n
 
 ## To conclude
 
