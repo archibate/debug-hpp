@@ -4,6 +4,7 @@
 #include <variant>
 #include <optional>
 #include <set>
+#include <span>
 #include <string>
 #include <vector>
 #include <functional>
@@ -48,6 +49,32 @@ int main() {
     debug(), o;
     std::function<void()> p = [] {};
     debug(), p;
+    std::u32string q = U"hello";
+    debug(), q;
+    std::vector<std::uint8_t> r = {1, 2, 3};
+    debug(), r;
+    std::vector<std::uint16_t> s = {1, 2, 3};
+    debug(), s;
+    std::uint8_t t = 42;
+    debug(), t;
+    char u = 42;
+    debug(), u;
+    char16_t v = 42;
+    debug(), v;
+#if __cpp_char8_t
+    char8_t w = 42;
+    debug(), w;
+#endif
+    wchar_t x = L'*';
+    debug(), x;
+    std::wstring y = L"hello";
+    debug(), y;
+    std::vector<char> z = {'h', 'e', 'l', 'l', 'o'};
+    debug(), z;
+#if __cpp_lib_span
+    std::span<char> z1 = z;
+    debug(), z1;
+#endif
     return 0;
 }
 

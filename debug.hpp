@@ -424,7 +424,8 @@ private:
             std::is_same<T, char8_t>::value ||
 #  endif
             std::is_same<T, char16_t>::value ||
-            std::is_same<T, char32_t>::value) {
+            std::is_same<T, char32_t>::value ||
+            std::is_same<T, wchar_t>::value) {
             auto f = oss.flags();
             oss << "'\\"
                 << " xu U"[sizeof(T)] << std::hex << std::setfill('0')
@@ -435,23 +436,29 @@ private:
                 << static_cast<std::uint32_t>(t) << "'";
             oss.flags(f);
 #  if DEBUG_UNSIGNED_AS_HEXADECIMAL
-        } else if constexpr (std::is_integral<T>::value &&
-                             std::is_unsigned<T>::value) {
-            auto f = oss.flags();
-            oss << "0x" << std::hex << std::setfill('0')
+        } else if constexpr (std::is_integral<T>::value) {
+            if constexpr (std::is_unsigned<T>::value) {
+                auto f = oss.flags();
+                oss << "0x" << std::hex << std::setfill('0')
 #   if DEBUG_UNSIGNED_AS_HEXADECIMAL >= 2
-                << std::setw(sizeof(T) * 2)
+                    << std::setw(sizeof(T) * 2)
 #   endif
 #   if DEBUG_HEXADECIMAL_UPPERCASE
-                << std::uppercase
+                    << std::uppercase
 #   endif
-                ;
-            if constexpr (sizeof(T) == 1) {
-                oss << static_cast<unsigned int>(t);
+                    ;
+                if constexpr (sizeof(T) == 1) {
+                    oss << static_cast<unsigned int>(t);
+                } else {
+                    oss << t;
+                }
+                oss.flags(f);
             } else {
-                oss << t;
+                oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
             }
-            oss.flags(f);
+#  else
+        } else if constexpr (std::is_integral<T>::value) {
+            oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
 #  endif
         } else if constexpr (std::is_floating_point<T>::value) {
             auto f = oss.flags();
@@ -653,11 +660,11 @@ private:
                                 std::is_same<T, wchar_t>::value);
 #  endif
 #  if DEBUG_UNSIGNED_AS_HEXADECIMAL
-    DEBUG_CON(integral_unsigned,
-              std::is_integral<T>::value &&std::is_unsigned<T>::value);
+    DEBUG_CON(integral_unsigned, std::is_integral<T>::value && std::is_unsigned<T>::value);
 #  else
     DEBUG_CON(integral_unsigned, false);
 #  endif
+    DEBUG_CON(integral, std::is_integral<T>::value);
     DEBUG_CON(floating_point, std::is_floating_point<T>::value);
     DEBUG_CON(pointer,
               std::is_pointer<T>::value || std::is_null_pointer<T>::value);
@@ -761,15 +768,7 @@ private:
                 << std::uppercase
 #  endif
                 ;
-            if
-#  if __cpp_if_constexpr
-                constexpr
-#  endif
-                (sizeof(T) == 1) {
-                oss << static_cast<unsigned int>(t);
-            } else {
-                oss << t;
-            }
+            oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
             oss.flags(f);
         }
     };
@@ -781,6 +780,20 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            debug_cond_integral<T>::value>::type> {
+        void operator()(std::ostream &oss, T const &t) const {
+            oss << static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
+        }
+    };
+
+    template <class T>
+    struct debug_format_trait<
+        T,
+        typename std::enable_if<
+            !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
+            !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
+            !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             debug_cond_floating_point<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
             auto f = oss.flags();
@@ -797,6 +810,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             debug_cond_is_smart_pointer<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
@@ -842,6 +856,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             debug_cond_is_ostream_ok<T>::value>::type> {
@@ -857,6 +872,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -886,6 +902,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -971,6 +988,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -991,6 +1009,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -1024,6 +1043,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -1042,6 +1062,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -1061,6 +1082,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -1081,6 +1103,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -1111,6 +1134,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
@@ -1133,6 +1157,7 @@ private:
             !debug_cond_string<T>::value && !debug_cond_bool<T>::value &&
             !debug_cond_char<T>::value && !debug_cond_unicode_char<T>::value &&
             !debug_cond_integral_unsigned<T>::value &&
+            !debug_cond_integral<T>::value &&
             !debug_cond_floating_point<T>::value &&
             !debug_cond_is_smart_pointer<T>::value &&
             !debug_cond_is_ostream_ok<T>::value &&
