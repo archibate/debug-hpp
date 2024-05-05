@@ -121,7 +121,7 @@ would supress all debug() prints and assertion checks, completely no runtime ove
 
 See https://godbolt.org/z/jYdj4T44n
 
-## 😉 To conclude
+## 🏅 To conclude
 
 TL;DR: This is a useful debugging utility the C++ programmers had all dreamed of:
 
