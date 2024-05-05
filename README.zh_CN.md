@@ -97,7 +97,7 @@ auto s = static_cast<std::string>(debug().noloc(), "我的变量是", your_varia
 ## 📝 输出重定向到 spdlog
 
 ```cpp
-#define DEBUG_OUTPUT(str) spdlog::info(x)  // 导入头文件前定义这个宏就可以控制 debug() 的结果输出到哪里
+#define DEBUG_OUTPUT(x) spdlog::info(x)  // 导入头文件前定义这个宏就可以控制 debug() 的结果输出到哪里
 #include "debug.hpp"
 ```
 

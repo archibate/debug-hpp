@@ -97,7 +97,7 @@ auto s = static_cast<std::string>(debug().noloc(), "my variable is", your_variab
 ## 📝 Redirect debug output to spdlog
 
 ```cpp
-#define DEBUG_OUTPUT(str) spdlog::info(x)  // define this macro before including the header to customize where debug() output its result
+#define DEBUG_OUTPUT(x) spdlog::info(x)  // define this macro before including the header to customize where debug() output its result
 #include "debug.hpp"
 ```
 
