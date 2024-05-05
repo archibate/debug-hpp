@@ -1,5 +1,6 @@
 #include "debug.hpp"
 #include <map>
+#include <chrono>
 #include <memory>
 #include <variant>
 #include <optional>
@@ -75,7 +76,14 @@ int main() {
     std::span<char> z1 = z;
     debug(), z1;
 #endif
+    std::chrono::nanoseconds z2(42);
+    debug(), z2;
+    auto z3 = std::chrono::system_clock::now();
+    debug(), z3;
     return 0;
 }
 
 // g++ -std=c++11 test.cpp -I .
+// g++ -std=c++14 test.cpp -I .
+// g++ -std=c++17 test.cpp -I .
+// g++ -std=c++20 test.cpp -I .
