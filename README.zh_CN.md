@@ -70,9 +70,17 @@ inline std::string repr(Student const &stu) {
 ```cpp
 auto s = std::string(debug(), "my variable is", your_variable);
 // s 现在的内容: "your_file.cpp:233:  my variable is {1, 2, 3}"
+
+auto s = std::string(debug().noloc(), "my variable is", your_variable);
+// s 现在的内容: "my variable is {1, 2, 3}"
 ```
 
-> 如需去掉 `"your_file.cpp:233:  "` 前缀，可以在导入本头文件前 `#define DEBUG_SHOW_SOURCE_LOCATION 0`
+## 输出重定向到 spdlog
+
+```cpp
+#define DEBUG_OUTPUT(str) spdlog::info(x)  // 导入头文件前定义这个宏就可以控制 debug() 的结果输出到哪里
+#include "debug.hpp"
+```
 
 ## 断言检查
 
@@ -113,10 +121,10 @@ your_file.cpp:233:  assertion failed: 3 < 0
 * `#define DEBUG_LEVEL 0` (定义了NDEBUG时默认) - 禁用debug输出，完全没有运行时开销
 * `#define DEBUG_LEVEL 1` (!定义了NDEBUG时默认) - 启用debug输出，打印你要求打印的所有内容
 
-* `#define DEBUG_SHOW_SOURCE_LOCATION 1` (默认) - 在每一行调试输出前加上打印该信息的代码文件名和行号 (例如：file.cpp:233)
-* `#define DEBUG_SHOW_SOURCE_LOCATION 0` - 不显示代码文件名和行号
+* `#define DEBUG_SHOW_LOCATION 1` (默认) - 在每一行调试输出前加上打印该信息的代码文件名和行号 (例如：file.cpp:233)
+* `#define DEBUG_SHOW_LOCATION 0` - 不显示代码文件名和行号
 
-* `#define DEBUG_DEFAULT_OUTPUT std::cerr` (默认) - 控制debug的输出写到哪里（必须是 std::ostream &）
+* `#define DEBUG_OUTPUT std::cerr <<` (默认) - 控制debug的输出写到哪里（必须可以 DEBUG_OUTPUT(str) 的形式调用）
 
 * `#define DEBUG_PANIC_METHOD 0` - 当断言失败时抛出一个运行时错误，错误消息为debug字符串
 * `#define DEBUG_PANIC_METHOD 1` (默认) - 当断言失败时打印错误消息，然后触发一个'陷阱'中断，方便调试器捕获，如果没有调试器附加，程序将终止
@@ -145,13 +153,23 @@ your_file.cpp:233:  assertion failed: 3 < 0
 
 * `#define DEBUG_SHOW_SOURCE_CODE_LINE 1` - 启用带有详细源代码级别信息的debug输出（需要源码文件路径可读）
 
-* `#define DEBUG_SHOW_NULLOPT "nullopt"` (默认) - 控制如何打印optional类对象（支持*x和(bool)x）当它是nullopt时
+* `#define DEBUG_NULLOPT_STRING "nullopt"` (默认) - 控制如何打印空的optional类对象（支持*x和(bool)x）
+
+* `#define DEBUG_NULLPTR_STRING "nullptr"` (默认) - 控制如何打印空的指针类对象（支持static_cast<void const volatile *>(x.get())）
+
+* `#define DEBUG_SMART_POINTER_MODE 1` (default) - print smart pointer as raw pointer address (e.g. 0xdeadbeaf)
+* `#define DEBUG_SMART_POINTER_MODE 2` - print smart pointer as content value unless nullptr (e.g. 42)
+* `#define DEBUG_SMART_POINTER_MODE 3` - print smart pointer as both content value and raw pointer address (e.g. 42@0xdeadbeaf)
+
+* `#define DEBUG_SMART_POINTER_MODE 1` (默认) - 打印智能指针为原始指针地址（例如0xdeadbeaf）
+* `#define DEBUG_SMART_POINTER_MODE 2` - 打印智能指针为其指向的内容值，除非为nullptr（例如42）
+* `#define DEBUG_SMART_POINTER_MODE 3` - 同时打印智能指针的内容值和原始指针地址（例如42@0xdeadbeaf）
 
 * `#define DEBUG_NAMESPACE_BEGIN` (默认) - 在全局命名空间中暴露debug
 * `#define DEBUG_NAMESPACE_END` (默认) - 同上
 
-* `#define DEBUG_NAMESPACE_BEGIN namespace mydebugger {` (默认) - 在命名空间`mydebugger`中暴露debug，使用时如`mydebugger::debug()`
-* `#define DEBUG_NAMESPACE_END }` (默认) - 同上
+* `#define DEBUG_NAMESPACE_BEGIN namespace mydebugger {` - 在自定义命名空间`mydebugger`中暴露debug，使用时如`mydebugger::debug()`
+* `#define DEBUG_NAMESPACE_END }` - 同上
 
 * `#define DEBUG_CLASS_NAME debug` (默认) - debug类的默认名称是`debug()`，你可以在这里定义你自己的名称
 

@@ -70,8 +70,17 @@ inline std::string repr(Student const &stu) {
 ```cpp
 auto s = std::string(debug(), "my variable is", your_variable);
 // content of `s`: "your_file.cpp:233:  my variable is {1, 2, 3}"
+
+auto s = std::string(debug().noloc(), "my variable is", your_variable);
+// content of `s`: "my variable is {1, 2, 3}"
 ```
-> To rid the `"your_file.cpp:233:  "` prefix, you may `#define DEBUG_SHOW_SOURCE_LOCATION 0` before including this header file
+
+## Redirect debug output to spdlog
+
+```cpp
+#define DEBUG_OUTPUT(str) spdlog::info(x)  // define this macro before including the header to customize where debug() output its result
+#include "debug.hpp"
+```
 
 ## Assertion check
 
@@ -111,10 +120,10 @@ Here is a list of configurable macros, define them **before** including this hea
 * `#define DEBUG_LEVEL 0` (default when defined NDEBUG) - disable debug output, completely no runtime overhead
 * `#define DEBUG_LEVEL 1` (default when !defined NDEBUG) - enable debug output, prints everything you asked to print
 
-* `#define DEBUG_SHOW_SOURCE_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
-* `#define DEBUG_SHOW_SOURCE_LOCATION 0` - do not show the location mark
+* `#define DEBUG_SHOW_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
+* `#define DEBUG_SHOW_LOCATION 0` - do not show the location mark
 
-* `#define DEBUG_DEFAULT_OUTPUT std::cerr` (default) - controls where to output the debug strings (must be std::ostream &)
+* `#define DEBUG_OUTPUT std::cerr <<` (default) - controls where to output the debug strings (must be callable as DEBUG_OUTPUT(str))
 
 * `#define DEBUG_PANIC_METHOD 0` - throws an runtime error with debug string as message when assertion failed
 * `#define DEBUG_PANIC_METHOD 1` (default) - print the error message when assertion failed, then triggers a 'trap' interrupt, useful for debuggers to catch, if no debuggers attached, the program would terminate
@@ -143,13 +152,19 @@ Here is a list of configurable macros, define them **before** including this hea
 
 * `#define DEBUG_SHOW_SOURCE_CODE_LINE 1` - enable debug output with detailed source code level information (requires readable source file path)
 
-* `#define DEBUG_SHOW_NULLOPT "nullopt"` (default) - controls how to print optional-like objects (supporting *x and (bool)x) when it is nullopt
+* `#define DEBUG_NULLOPT_STRING "nullopt"` (default) - controls how to print optional-like objects (supporting *x and (bool)x) when it is nullopt
+
+* `#define DEBUG_NULLPTR_STRING "nullptr"` (default) - controls how to print pointer-like objects (supporting static_cast<void const volatile *>(x.get())) when it is nullptr
+
+* `#define DEBUG_SMART_POINTER_MODE 1` (default) - print smart pointer as raw pointer address (e.g. 0xdeadbeaf)
+* `#define DEBUG_SMART_POINTER_MODE 2` - print smart pointer as content value unless nullptr (e.g. 42)
+* `#define DEBUG_SMART_POINTER_MODE 3` - print smart pointer as both content value and raw pointer address (e.g. 42@0xdeadbeaf)
 
 * `#define DEBUG_NAMESPACE_BEGIN` (default) - expose debug in the global namespace
 * `#define DEBUG_NAMESPACE_END` (default) - ditto
 
-* `#define DEBUG_NAMESPACE_BEGIN namespace mydebugger {` (default) - expose debug in the the namespace `mydebugger`, and use it like `mydebugger::debug()`
-* `#define DEBUG_NAMESPACE_END }` (default) - ditto
+* `#define DEBUG_NAMESPACE_BEGIN namespace mydebugger {` - expose debug in the the namespace `mydebugger`, and use it like `mydebugger::debug()`
+* `#define DEBUG_NAMESPACE_END }` - ditto
 
 * `#define DEBUG_CLASS_NAME debug` (default) - the default name for the debug class is `debug()`, you may define your custom name here
 
