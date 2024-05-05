@@ -14,6 +14,10 @@ Try this handy header-only library 🚀 prints everything including STL containe
 - single header only ✅
 - thread safe ✅
 
+```bash
+curl -sOLf http://142857.red/debug.hpp
+```
+
 ## 🎨 Usage
 
 ```cpp
