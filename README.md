@@ -59,7 +59,7 @@ struct Student {
 };
 
 // if adding member function is not possible, you may also define repr as free function within the same namespace as Student (thanks to C++'s ADL mechanism):
-inline std::string repr(Student const &stu) {
+inline auto repr(Student const &stu) {
     return std::make_tuple(name, age);
 }
 ```

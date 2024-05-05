@@ -58,8 +58,8 @@ struct Student {
     }
 };
 
-// 如果你不方便成员函数，也可以在 Student 所在的同一命名空间中定义一个全局函数 repr（多亏了 C++ 的 ADL 机制）:
-inline std::string repr(Student const &stu) {
+// 如果你不方便添加成员函数，也可以在 Student 所在的同一命名空间中定义一个全局函数 repr（多亏了 C++ 的 ADL 机制）:
+inline auto repr(Student const &stu) {
     return std::make_tuple(name, age);
 }
 ```
