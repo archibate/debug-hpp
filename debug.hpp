@@ -66,6 +66,8 @@
 // `#define DEBUG_TUPLE_BRACE "{}"` (default) - controls format for tuple-like objects (supporting std::tuple_size<X>) in "{1, 2, 3}"
 // `#define DEBUG_TUPLE_COMMA ", "` (default) - ditto
 //
+// `#define DEBUG_NAMED_MEMBER_MARK ": "` (default) - used in debug::named_member and DEBUG_REPR, e.g. '{name: "name", age: 42}'
+//
 // `#define DEBUG_MAGIC_ENUM magic_enum::enum_name` - enable printing enum in their name rather than value, if you have magic_enum.hpp
 //
 // `#define DEBUG_UNSIGNED_AS_HEXADECIMAL 0` (default) - print unsigned integers as decimal
@@ -91,8 +93,8 @@
 // `#define DEBUG_NAMESPACE_BEGIN` (default) - expose debug in the global namespace
 // `#define DEBUG_NAMESPACE_END` (default) - ditto
 //
-// `#define DEBUG_NAMESPACE_BEGIN namespace mydebugger {` (default) - expose debug in the the namespace `mydebugger`, and use it like `mydebugger::debug()`
-// `#define DEBUG_NAMESPACE_END }` (default) - ditto
+// `#define DEBUG_NAMESPACE_BEGIN namespace mydebugger {` - expose debug in the the namespace `mydebugger`, and use it like `mydebugger::debug()`
+// `#define DEBUG_NAMESPACE_END }` - ditto
 //
 // `#define DEBUG_CLASS_NAME debug` (default) - the default name for the debug class is `debug()`, you may define your custom name here
 //
@@ -175,6 +177,10 @@
 
 #ifndef DEBUG_ENUM_BRACE
 # define DEBUG_ENUM_BRACE "()"
+#endif
+
+#ifndef DEBUG_NAMED_MEMBER_MARK
+# define DEBUG_NAMED_MEMBER_MARK ": "
 #endif
 
 #ifndef DEBUG_NULLOPT_STRING
@@ -1569,7 +1575,7 @@ public:
         T const &value;
 
         void DEBUG_REPR_NAME(std::ostream &os) const {
-            os << name << ": ";
+            os << name << DEBUG_NAMED_MEMBER_MARK;
             debug_format(os, value);
         }
     };
@@ -1642,7 +1648,7 @@ public:
 #define DEBUG_PP_UNWRAP_BRACE(...) DEBUG_PP_UNWRAP_BRACE_ __VA_ARGS__
 #define DEBUG_PP_UNWRAP_BRACE_(...) __VA_ARGS__
 
-#define DEBUG_REPR_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x ": "; formatter << x;
+#define DEBUG_REPR_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x DEBUG_NAMED_MEMBER_MARK; formatter << x;
 #define DEBUG_REPR(...) \
 template <class debug_formatter> \
 void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter) const { \
@@ -1652,7 +1658,7 @@ void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter) const { \
     formatter.os << DEBUG_TUPLE_BRACE[1]; \
 }
 
-#define DEBUG_REPR_GLOBAL_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x ": "; formatter << object.x;
+#define DEBUG_REPR_GLOBAL_ON_EACH(x) if (add_comma) formatter.os << DEBUG_TUPLE_COMMA; else add_comma = true; formatter.os << #x DEBUG_NAMED_MEMBER_MARK; formatter << object.x;
 #define DEBUG_REPR_GLOBAL(T, ...) \
 template <class debug_formatter> \
 void DEBUG_FORMATTER_REPR_NAME(debug_formatter formatter, T const &object) { \

@@ -178,6 +178,8 @@ Here is a list of configurable macros, define them **before** including this hea
 * `#define DEBUG_TUPLE_BRACE "{}"` (default) - controls format for tuple-like objects (supporting std::tuple_size<X>) in "{1, 2, 3}"
 * `#define DEBUG_TUPLE_COMMA ", "` (default) - ditto
 
+* `#define DEBUG_NAMED_MEMBER_MARK ": "` (default) - used in debug::named_member and DEBUG_REPR, e.g. '{name: "name", age: 42}'
+
 * `#define DEBUG_MAGIC_ENUM magic_enum::enum_name` - enable printing enum in their name rather than value, if you have magic_enum.hpp
 
 * `#define DEBUG_UNSIGNED_AS_HEXADECIMAL 0` (default) - print unsigned integers as decimal

@@ -179,6 +179,8 @@ your_file.cpp:233:  assertion failed: 3 < 0
 * `#define DEBUG_TUPLE_BRACE "{}"` (默认) - 控制元组类对象（支持std::tuple_size<X>）的格式，如"{1, 2, 3}"
 * `#define DEBUG_TUPLE_COMMA ", "` (默认) - 同上
 
+* `#define DEBUG_NAMED_MEMBER_MARK ": "` (默认) - 在debug::named_member和DEBUG_REPR中使用，例如：'{name: "name", age: 42}'
+
 * `#define DEBUG_MAGIC_ENUM magic_enum::enum_name` - 启用打印枚举的名称而不是值，需要你有magic_enum.hpp
 
 * `#define DEBUG_UNSIGNED_AS_HEXADECIMAL 0` (默认) - 打印无符号整数为十进制
