@@ -1694,9 +1694,10 @@ public:
 #define DEBUG_PP_IF_0(t, f) DEBUG_PP_UNWRAP_BRACE(f)
 #define DEBUG_PP_IF_1(t, f) DEBUG_PP_UNWRAP_BRACE(t)
 
-#define DEBUG_PP_NARG(...) DEBUG_PP_IF((__VA_ARGS__), (0), (DEBUG_PP_NARG_(__VA_ARGS__, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)))
+
+#define DEBUG_PP_NARG(...) DEBUG_PP_IF((__VA_ARGS__), (0), (DEBUG_PP_NARG_(__VA_ARGS__, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)))
 #define DEBUG_PP_NARG_(...) DEBUG_PP_NARG__(__VA_ARGS__)
-#define DEBUG_PP_NARG__(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
+#define DEBUG_PP_NARG__(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, N, ...) N
 
 #define DEBUG_PP_FOREACH(f, ...) DEBUG_PP_FOREACH_(DEBUG_PP_NARG(__VA_ARGS__), f, __VA_ARGS__)
 #define DEBUG_PP_FOREACH_(N, f, ...) DEBUG_PP_FOREACH__(N, f, __VA_ARGS__)
@@ -1712,6 +1713,24 @@ public:
 #define DEBUG_PP_FOREACH_8(f, a, b, c, d, e, g, h, i) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i)
 #define DEBUG_PP_FOREACH_9(f, a, b, c, d, e, g, h, i, j) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j)
 #define DEBUG_PP_FOREACH_10(f, a, b, c, d, e, g, h, i, j, k) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k)
+#define DEBUG_PP_FOREACH_11(f, a, b, c, d, e, g, h, i, j, k, l) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l)
+#define DEBUG_PP_FOREACH_12(f, a, b, c, d, e, g, h, i, j, k, l, m) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m)
+#define DEBUG_PP_FOREACH_13(f, a, b, c, d, e, g, h, i, j, k, l, m, n) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n)
+#define DEBUG_PP_FOREACH_14(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o)
+#define DEBUG_PP_FOREACH_15(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p)
+#define DEBUG_PP_FOREACH_16(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q)
+#define DEBUG_PP_FOREACH_17(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r)
+#define DEBUG_PP_FOREACH_18(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s)
+#define DEBUG_PP_FOREACH_19(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t)
+#define DEBUG_PP_FOREACH_20(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t) f(u)
+#define DEBUG_PP_FOREACH_21(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t) f(u) f(v)
+#define DEBUG_PP_FOREACH_22(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t) f(u) f(v) f(w)
+#define DEBUG_PP_FOREACH_23(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t) f(u) f(v) f(w) f(x)
+#define DEBUG_PP_FOREACH_24(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t) f(u) f(v) f(w) f(x) f(y)
+#define DEBUG_PP_FOREACH_25(f, a, b, c, d, e, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z) f(a) f(b) f(c) f(d) f(e) f(g) f(h) f(i) f(j) f(k) f(l) f(m) f(n) f(o) f(p) f(q) f(r) f(s) f(t) f(u) f(v) f(w) f(x) f(y) f(z)
+
+#define DEBUG_PP_STRINGIFY(...) DEBUG_PP_STRINGIFY(__VA_ARGS__)
+#define DEBUG_PP_STRINGIFY_(...) #__VA_ARGS__
 
 #define DEBUG_PP_EXPAND(...) DEBUG_PP_EXPAND_(__VA_ARGS__)
 #define DEBUG_PP_EXPAND_(...) __VA_ARGS__
