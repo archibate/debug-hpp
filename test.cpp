@@ -165,6 +165,18 @@ int main() {
     Student4 z10;
     debug(), z10;
 
+    std::errc z11 = std::errc::host_unreachable;
+    debug(), z11;
+
+    std::errc z12 = std::errc();
+    debug(), z12;
+
+    std::error_code z13((int)std::io_errc::stream, std::iostream_category());
+    debug(), z13;
+
+    std::error_condition z14((int)std::io_errc::stream, std::iostream_category());
+    debug(), z14;
+
     return 0;
 }
 

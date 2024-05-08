@@ -146,7 +146,7 @@ See https://godbolt.org/z/jYdj4T44n
 TL;DR: This is a useful debugging utility the C++ programmers had all dreamed of:
 
 1. print using the neat comma syntax, easy-to-use
-2. supports printing STL objects including string, vector, tuple, optional, variant, unique_ptr, type_info, and so on.
+2. supports printing STL objects including string, vector, tuple, optional, variant, unique_ptr, type_info, error_code, and so on.
 3. just add a member method named `repr`, e.g. `std::string repr() const { ... }` to support printing your custom class!
 4. classes that are not supported to print will be shown in something like `[TypeName@0xdeadbeaf]` where 0xdeadbeaf is it's address.
 5. highly configurable, customize the behaviour by defining the DEBUG_xxx macros (see below)
