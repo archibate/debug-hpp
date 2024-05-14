@@ -272,7 +272,7 @@ private:
     Delim delimiter;
 };
 
-inline SplitString<std::string_view> split_string(std::string_view s,
+inline split_string_t<std::string_view> split_string(std::string_view s,
                                                   std::string_view delimiter) {
     return {s, delimiter};
 }
