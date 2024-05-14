@@ -160,6 +160,14 @@ Here is a list of configurable macros, define them **before** including this hea
 * `#define DEBUG_LEVEL 0` (default when defined NDEBUG) - disable debug output, completely no runtime overhead
 * `#define DEBUG_LEVEL 1` (default when !defined NDEBUG) - enable debug output, prints everything you asked to print
 
+* `#define DEBUG_STEPPING 0` (default) - no step debugging
+* `#define DEBUG_STEPPING 1` - enable step debugging, stops whenever debug output generated, manually press ENTER to continue
+* `#define DEBUG_STEPPING 2` - enable step debugging, like 1, but trigger a 'trap' interrupt for debugger to catch instead
+
+* `#define DEBUG_SHOW_TIMESTAMP 0` - do not print timestamp
+* `#define DEBUG_SHOW_TIMESTAMP 1` - enable printing a timestamp for each line of debug output (e.g. "09:57:32")
+* `#define DEBUG_SHOW_TIMESTAMP 2` (default) - printing timestamp relative to program staring time rather than system real time
+
 * `#define DEBUG_SHOW_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
 * `#define DEBUG_SHOW_LOCATION 0` - do not show the location mark
 
