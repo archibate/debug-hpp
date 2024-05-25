@@ -168,6 +168,9 @@ Here is a list of configurable macros, define them **before** including this hea
 * `#define DEBUG_SHOW_TIMESTAMP 1` - enable printing a timestamp for each line of debug output (e.g. "09:57:32")
 * `#define DEBUG_SHOW_TIMESTAMP 2` (default) - printing timestamp relative to program staring time rather than system real time
 
+* `#define DEBUG_SHOW_THREAD_ID 0` (default) - do not print the thread id
+* `#define DEBUG_SHOW_THREAD_ID 1` - print the current thread id
+
 * `#define DEBUG_SHOW_LOCATION 1` (default) - show source location mark before each line of the debug output (e.g. "file.cpp:233")
 * `#define DEBUG_SHOW_LOCATION 0` - do not show the location mark
 

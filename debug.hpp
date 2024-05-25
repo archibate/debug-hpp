@@ -84,6 +84,9 @@
 // `#define DEBUG_SHOW_TIMESTAMP 2` (default) - printing timestamp relative to
 // program staring time rather than system real time
 //
+// `#define DEBUG_SHOW_THREAD_ID 0` (default) - do not print the thread id
+// `#define DEBUG_SHOW_THREAD_ID 1` - print the current thread id
+//
 // `#define DEBUG_SHOW_LOCATION 1` (default) - show source location mark before
 // each line of the debug output (e.g. "file.cpp:233")
 // `#define DEBUG_SHOW_LOCATION 0` - do not show the location mark
@@ -298,7 +301,7 @@
 #  include <unordered_map>
 # endif
 # ifndef DEBUG_SOURCE_LOCATION
-#  if __cplusplus >= 202'002L
+#  if __cplusplus >= 202002L
 #   if defined(__has_include)
 #    if __has_include(<source_location>)
 #     include <source_location>
@@ -310,7 +313,7 @@
 #  endif
 # endif
 # ifndef DEBUG_SOURCE_LOCATION
-#  if __cplusplus >= 201'505L
+#  if __cplusplus >= 201505L
 #   if defined(__has_include)
 #    if __has_include(<experimental/source_location>)
 #     include <experimental/source_location>
@@ -352,6 +355,9 @@
 # elif DEBUG_SHOW_TIMESTAMP == 2
 #  include <chrono>
 # endif
+# if DEBUG_SHOW_THREAD_ID
+#  include <thread>
+# endif
 # if defined(__has_include)
 #  if __has_include(<variant>)
 #   include <variant>
@@ -359,7 +365,7 @@
 # endif
 # ifndef DEBUG_STRING_VIEW
 #  if defined(__has_include)
-#   if __cplusplus >= 201'703L
+#   if __cplusplus >= 201703L
 #    if __has_include(<string_view>)
 #     include <string_view>
 #     if __cpp_lib_string_view
@@ -373,7 +379,7 @@
 #  include <string>
 #  define DEBUG_STRING_VIEW std::string
 # endif
-# if __cplusplus >= 202'002L
+# if __cplusplus >= 202002L
 #  if defined(__has_cpp_attribute)
 #   if __has_cpp_attribute(unlikely)
 #    define DEBUG_UNLIKELY [[unlikely]]
@@ -462,7 +468,7 @@ private:
     }
 
     struct debug_special_void {
-        char const (&repr())[5] const {
+        char const (&repr() const)[5] {
             return "void";
         }
     };
@@ -722,15 +728,15 @@ private:
             bool add_comma = false;
             std::apply(
                 [&](auto &&...args) {
-                (([&] {
-                    if (add_comma) {
-                        oss << DEBUG_TUPLE_COMMA;
-                    }
-                    add_comma = true;
-                    debug_format(oss, std::forward<decltype(args)>(args));
-                }()),
-                 ...);
-            },
+                    (([&] {
+                         if (add_comma) {
+                             oss << DEBUG_TUPLE_COMMA;
+                         }
+                         add_comma = true;
+                         debug_format(oss, std::forward<decltype(args)>(args));
+                     }()),
+                     ...);
+                },
                 t);
             oss << DEBUG_TUPLE_BRACE[1];
         } else if constexpr (std::is_enum<T>::value) {
@@ -829,6 +835,12 @@ private:
                                      std::declval<T const &>().get()));
     DEBUG_COND(is_optional, (((void)*std::declval<T const &>(), (void)0),
                              ((void)(bool)std::declval<T const &>(), (void)0)));
+    DEBUG_COND(
+        reference_wrapper,
+        (typename std::enable_if<
+            std::is_same<typename T::type &,
+                         decltype(std::declval<T const &>().get())>::value,
+            int>::type)0);
 #  define DEBUG_CON(n, ...) \
       template <class T> \
       struct debug_cond_##n : debug_bool_constant<__VA_ARGS__> {};
@@ -840,9 +852,6 @@ private:
     DEBUG_CON(error_code, std::is_same<T, std::errc>::value ||
                               std::is_same<T, std::error_code>::value ||
                               std::is_same<T, std::error_condition>::value);
-    DEBUG_CON(reference_wrapper,
-              std::is_same<typename T::type &,
-                           decltype(std::declval<T const &>().get())>::value);
 #  if __cpp_char8_t
     DEBUG_CON(unicode_char, std::is_same<T, char8_t>::value ||
                                 std::is_same<T, char16_t>::value ||
@@ -1578,6 +1587,9 @@ private:
         oss << elapsed % 1000;
         oss.flags(flags);
         oss << ' ';
+# endif
+# if DEBUG_SHOW_THREAD_ID
+        oss << '[' << std::this_thread::get_id() << ']' << ' ';
 # endif
         char const *fn = loc.file_name();
         for (char const *fp = fn; *fp; ++fp) {

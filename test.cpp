@@ -1,3 +1,4 @@
+#define DEBUG_SHOW_THREAD_ID 1
 #include "debug.hpp"
 #include <map>
 #include <set>
@@ -50,13 +51,9 @@ struct Student4 {
 #endif
 };
 
-template <class T>
-void func(T const &t) {
-    static_assert(std::is_same<T, char[3]>::value, "T must be std::string");
-}
-
 int main() {
-    func("ki");
+    debug(), 1;
+#if 0
     int i = 42;
     debug(), "the answer:", i;
     std::vector<int> a{1, 2, 3, 4, 5};
@@ -178,6 +175,7 @@ int main() {
     debug(), z14;
 
     return 0;
+#endif
 }
 
 /*

@@ -165,6 +165,13 @@ your_file.cpp:233:  assertion failed: 3 < 0
 * `#define DEBUG_STEPPING 1` - 启用单步调试，每次打印调试输出时暂停，手动按下回车键以继续
 * `#define DEBUG_STEPPING 2` - 启用单步调试，但改为触发一个'陷阱'中断，以便调试器捕获
 
+* `#define DEBUG_SHOW_TIMESTAMP 0` - 不打印时间戳
+* `#define DEBUG_SHOW_TIMESTAMP 1` - 打印时间戳（例如"09:57:32"）
+* `#define DEBUG_SHOW_TIMESTAMP 2` (默认) - 打印时间戳，但是相对于程序启动时间而不是系统实时时间
+
+* `#define DEBUG_SHOW_THREAD_ID 0` (默认) - 不打印线程ID
+* `#define DEBUG_SHOW_THREAD_ID 1` - 打印当前线程ID
+
 * `#define DEBUG_SHOW_LOCATION 1` (默认) - 在每一行调试输出前加上打印该信息的代码文件名和行号 (例如：file.cpp:233)
 * `#define DEBUG_SHOW_LOCATION 0` - 不显示代码文件名和行号
 
