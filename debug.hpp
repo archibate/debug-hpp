@@ -463,7 +463,7 @@ private:
 # endif
     template <class T>
     static auto debug_deref_avoid(T const &t)
-        -> std::enable_if_t<!std::is_void_v<decltype(*t)>, decltype(*t)> {
+        -> typename std::enable_if<!std::is_void<decltype(*t)>::value, decltype(*t)>::type {
         return *t;
     }
 
@@ -475,7 +475,7 @@ private:
 
     template <class T>
     static auto debug_deref_avoid(T const &t)
-        -> std::enable_if_t<std::is_void_v<decltype(*t)>, debug_special_void> {
+        -> typename std::enable_if<std::is_void<decltype(*t)>::value, debug_special_void>::type {
         return debug_special_void();
     }
 
@@ -619,8 +619,7 @@ private:
             }
 #  else
         } else if constexpr (std::is_integral<T>::value) {
-            oss << static_cast<std::uint64_t>(
-                static_cast<typename std::make_unsigned<T>::type>(t));
+            oss << t; // static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
 #  endif
         } else if constexpr (std::is_floating_point<T>::value) {
             auto f = oss.flags();
@@ -830,7 +829,12 @@ private:
         void operator()(T const &) const {}
     };
 
+#  if __cpp_lib_variant
     DEBUG_COND(is_variant, std::variant_size<T>::value);
+#   else
+    template <class>
+    struct debug_cond_is_variant : std::false_type {};
+#  endif
     DEBUG_COND(is_smart_pointer, static_cast<void const volatile *>(
                                      std::declval<T const &>().get()));
     DEBUG_COND(is_optional, (((void)*std::declval<T const &>(), (void)0),
@@ -994,8 +998,7 @@ private:
                !debug_cond_integral_unsigned<T>::value &&
                debug_cond_integral<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-            oss << static_cast<std::uint64_t>(
-                static_cast<typename std::make_unsigned<T>::type>(t));
+            oss << t; // static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
         }
     };
 
@@ -1944,18 +1947,18 @@ public:
         return {value};
     }
 
-    template <class T, std::enable_if_t<
+    template <class T, typename std::enable_if<
                            std::is_convertible<T, std::string>::value ||
                                std::is_convertible<T, DEBUG_STRING_VIEW>::value,
-                           int> = 0>
+                           int>::type = 0>
     static raw_repr_t<T> raw_repr_if_string(T const &value) {
         return {value};
     }
 
-    template <class T, std::enable_if_t<
+    template <class T, typename std::enable_if<
                            !(std::is_convertible<T, std::string>::value ||
                              std::is_convertible<T, DEBUG_STRING_VIEW>::value),
-                           int> = 0>
+                           int>::type = 0>
     static T const &raw_repr_if_string(T const &value) {
         return value;
     }

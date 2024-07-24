@@ -52,8 +52,7 @@ struct Student4 {
 };
 
 int main() {
-    debug(), 1;
-#if 0
+    debug(), -1;
     int i = 42;
     debug(), "the answer:", i;
     std::vector<int> a{1, 2, 3, 4, 5};
@@ -175,7 +174,6 @@ int main() {
     debug(), z14;
 
     return 0;
-#endif
 }
 
 /*
