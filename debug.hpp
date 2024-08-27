@@ -549,241 +549,6 @@ public:
     };
 
 private:
-# if __cpp_if_constexpr && __cpp_concepts && \
-     __cpp_lib_type_trait_variable_templates
-public:
-    template <class T, class U>
-        requires std::is_same<T, U>::value
-    static void debug_same_as(U &&) {}
-
-private:
-    template <class T>
-    static void debug_format(std::ostream &oss, T const &t) {
-        using std::begin;
-        using std::end;
-        if constexpr (debug_is_char_array<T>::value) {
-            oss << t;
-        } else if constexpr ((std::is_convertible<T,
-                                                  DEBUG_STRING_VIEW>::value ||
-                              std::is_convertible<T, std::string>::value)) {
-            if constexpr (!std::is_convertible<T, DEBUG_STRING_VIEW>::value) {
-                std::string s = t;
-                debug_quotes(oss, s, '"');
-            } else {
-                debug_quotes(oss, t, '"');
-            }
-        } else if constexpr (std::is_same<T, bool>::value) {
-            auto f = oss.flags();
-            oss << std::boolalpha << t;
-            oss.flags(f);
-        } else if constexpr (std::is_same<T, char>::value ||
-                             std::is_same<T, signed char>::value) {
-            debug_quotes(oss, {reinterpret_cast<char const *>(&t), 1}, '\'');
-        } else if constexpr (
-#  if __cpp_char8_t
-            std::is_same<T, char8_t>::value ||
-#  endif
-            std::is_same<T, char16_t>::value ||
-            std::is_same<T, char32_t>::value ||
-            std::is_same<T, wchar_t>::value) {
-            auto f = oss.flags();
-            oss << "'\\"
-                << " xu U"[sizeof(T)] << std::hex << std::setfill('0')
-                << std::setw(sizeof(T) * 2)
-#  if DEBUG_HEXADECIMAL_UPPERCASE
-                << std::uppercase
-#  endif
-                << static_cast<std::uint32_t>(t) << "'";
-            oss.flags(f);
-#  if DEBUG_UNSIGNED_AS_HEXADECIMAL
-        } else if constexpr (std::is_integral<T>::value) {
-            if constexpr (std::is_unsigned<T>::value) {
-                auto f = oss.flags();
-                oss << "0x" << std::hex << std::setfill('0')
-#   if DEBUG_UNSIGNED_AS_HEXADECIMAL >= 2
-                    << std::setw(sizeof(T) * 2)
-#   endif
-#   if DEBUG_HEXADECIMAL_UPPERCASE
-                    << std::uppercase
-#   endif
-                    ;
-                if constexpr (sizeof(T) == 1) {
-                    oss << static_cast<unsigned int>(t);
-                } else {
-                    oss << t;
-                }
-                oss.flags(f);
-            } else {
-                oss << static_cast<std::uint64_t>(
-                    static_cast<typename std::make_unsigned<T>::type>(t));
-            }
-#  else
-        } else if constexpr (std::is_integral<T>::value) {
-            oss << t; // static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
-#  endif
-        } else if constexpr (std::is_floating_point<T>::value) {
-            auto f = oss.flags();
-            oss << std::fixed
-                << std::setprecision(std::numeric_limits<T>::digits10) << t;
-            oss.flags(f);
-        } else if constexpr (requires(T const &t) {
-                                 static_cast<void const volatile *>(t.get());
-                             }) {
-            auto const *p = t.get();
-            if (p != nullptr) {
-#  if DEBUG_SMART_POINTER_MODE == 1
-                debug_format(oss, *p);
-#  elif DEBUG_SMART_POINTER_MODE == 2
-                auto f = oss.flags();
-                oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
-                    << std::setfill('0')
-#   if DEBUG_HEXADECIMAL_UPPERCASE
-                    << std::uppercase
-#   endif
-                    ;
-                oss << reinterpret_cast<std::uintptr_t>(
-                    static_cast<void const volatile *>(p));
-                oss.flags(f);
-#  else
-                debug_format(oss, *p);
-                oss << DEBUG_SMART_POINTER_AT;
-                auto f = oss.flags();
-                oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
-                    << std::setfill('0')
-#   if DEBUG_HEXADECIMAL_UPPERCASE
-                    << std::uppercase
-#   endif
-                    ;
-                oss << reinterpret_cast<std::uintptr_t>(
-                    static_cast<void const volatile *>(p));
-                oss.flags(f);
-#  endif
-            } else {
-                oss << DEBUG_NULLPTR_STRING;
-            }
-        } else if constexpr (std::is_same<T, std::errc>::value) {
-            oss << DEBUG_ERROR_CODE_BRACE[0];
-            if (t != std::errc()) {
-                oss << std::generic_category().name() << DEBUG_ERROR_CODE_INFIX
-#  if DEBUG_ERROR_CODE_SHOW_NUMBER
-                    << ' ' << static_cast<int>(t)
-#  endif
-                    << DEBUG_ERROR_CODE_POSTFIX;
-                oss << std::generic_category().message(static_cast<int>(t));
-            } else {
-                oss << DEBUG_ERROR_CODE_NO_ERROR;
-            }
-            oss << DEBUG_ERROR_CODE_BRACE[1];
-        } else if constexpr (std::is_same<T, std::error_code>::value ||
-                             std::is_same<T, std::error_condition>::value) {
-            oss << DEBUG_ERROR_CODE_BRACE[0];
-            if (t) {
-                oss << t.category().name() << DEBUG_ERROR_CODE_INFIX
-#  if DEBUG_ERROR_CODE_SHOW_NUMBER
-                    << ' ' << t.value()
-#  endif
-                    << DEBUG_ERROR_CODE_POSTFIX << t.message();
-            } else {
-                oss << DEBUG_ERROR_CODE_NO_ERROR;
-            }
-            oss << DEBUG_ERROR_CODE_BRACE[1];
-        } else if constexpr (requires(T const &t) {
-                                 debug_same_as<typename T::type &>(t.get());
-                             }) {
-            debug_format(oss, t.get());
-        } else if constexpr (requires(std::ostream &oss, T const &t) {
-                                 oss << t;
-                             }) {
-            oss << t;
-        } else if constexpr (std::is_pointer<T>::value ||
-                             std::is_same<T, std::nullptr_t>::value) {
-            if (t == nullptr) {
-                auto f = oss.flags();
-                oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
-                    << std::setfill('0')
-#  if DEBUG_HEXADECIMAL_UPPERCASE
-                    << std::uppercase
-#  endif
-                    ;
-                oss << reinterpret_cast<std::uintptr_t>(
-                    reinterpret_cast<void const volatile *>(t));
-                oss.flags(f);
-            } else {
-                oss << DEBUG_NULLPTR_STRING;
-            }
-        } else if constexpr (requires(T const &t) { begin(t) != end(t); }) {
-            oss << DEBUG_RANGE_BRACE[0];
-            bool add_comma = false;
-            for (auto &&i: t) {
-                if (add_comma) {
-                    oss << DEBUG_RANGE_COMMA;
-                }
-                add_comma = true;
-                debug_format(oss, std::forward<decltype(i)>(i));
-            }
-            oss << DEBUG_RANGE_BRACE[1];
-        } else if constexpr (requires { std::tuple_size<T>::value; }) {
-            oss << DEBUG_TUPLE_BRACE[0];
-            bool add_comma = false;
-            std::apply(
-                [&](auto &&...args) {
-                    (([&] {
-                         if (add_comma) {
-                             oss << DEBUG_TUPLE_COMMA;
-                         }
-                         add_comma = true;
-                         debug_format(oss, std::forward<decltype(args)>(args));
-                     }()),
-                     ...);
-                },
-                t);
-            oss << DEBUG_TUPLE_BRACE[1];
-        } else if constexpr (std::is_enum<T>::value) {
-#  ifdef DEBUG_MAGIC_ENUM
-            oss << DEBUG_MAGIC_ENUM(t);
-#  else
-            oss << debug_demangle(typeid(T).name()) << DEBUG_ENUM_BRACE[0];
-            oss << static_cast<typename std::underlying_type<T>::type>(t);
-            oss << DEBUG_ENUM_BRACE[1];
-#  endif
-        } else if constexpr (std::is_same<T, std::type_info>::value) {
-            oss << debug_demangle(t.name());
-        } else if constexpr (requires(T const &t) { t.DEBUG_REPR_NAME(); }) {
-            debug_format(oss, raw_repr_if_string(t.DEBUG_REPR_NAME()));
-        } else if constexpr (requires(T const &t) { t.DEBUG_REPR_NAME(oss); }) {
-            t.DEBUG_REPR_NAME(oss);
-        } else if constexpr (requires(T const &t) { DEBUG_REPR_NAME(t); }) {
-            debug_format(oss, raw_repr_if_string(DEBUG_REPR_NAME(t)));
-        } else if constexpr (requires(debug_formatter const &out, T const &t) {
-                                 t.DEBUG_FORMATTER_REPR_NAME(out);
-                             }) {
-            t.DEBUG_FORMATTER_REPR_NAME(debug_formatter{oss});
-        } else if constexpr (requires(debug_formatter const &out, T const &t) {
-                                 DEBUG_FORMATTER_REPR_NAME(out, t);
-                             }) {
-            DEBUG_FORMATTER_REPR_NAME(debug_formatter{oss}, t);
-#  if __cpp_lib_variant
-        } else if constexpr (requires { std::variant_size<T>::value; }) {
-            visit([&oss](auto const &t) { debug_format(oss, t); }, t);
-#  endif
-        } else if constexpr (requires(T const &t) {
-                                 (void)(*t);
-                                 (void)(bool)t;
-                             }) {
-            if ((bool)t) {
-                debug_format(oss, debug_deref_avoid(t));
-            } else {
-                oss << DEBUG_NULLOPT_STRING;
-            }
-        } else {
-            oss << DEBUG_UNKNOWN_TYPE_BRACE[0]
-                << debug_demangle(typeid(t).name()) << DEBUG_UNKNOWN_TYPE_AT;
-            debug_format(oss,
-                         reinterpret_cast<void const *>(std::addressof(t)));
-            oss << DEBUG_UNKNOWN_TYPE_BRACE[1];
-        }
-    }
-# else
     template <class T>
     struct debug_void {
         using type = void;
@@ -983,7 +748,7 @@ private:
                 << std::uppercase
 #  endif
                 ;
-            oss << static_cast<std::uint64_t>(
+            oss << static_cast<std::uintmax_t>(
                 static_cast<typename std::make_unsigned<T>::type>(t));
             oss.flags(f);
         }
@@ -998,7 +763,7 @@ private:
                !debug_cond_integral_unsigned<T>::value &&
                debug_cond_integral<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-            oss << t; // static_cast<std::uint64_t>(static_cast<typename std::make_unsigned<T>::type>(t));
+            oss << static_cast<typename std::conditional<std::is_signed<T>::value, std::intmax_t, std::uintmax_t>::type>(t);
         }
     };
 
@@ -1530,7 +1295,7 @@ private:
             }
         }
     };
-# endif
+
     std::ostringstream oss;
 
     enum {

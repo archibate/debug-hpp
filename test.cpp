@@ -1,3 +1,4 @@
+// #define DEBUG_UNSIGNED_AS_HEXADECIMAL 1
 #define DEBUG_SHOW_THREAD_ID 1
 #include "debug.hpp"
 #include <map>
@@ -52,6 +53,8 @@ struct Student4 {
 };
 
 int main() {
+    debug(), 'a';
+    debug(), (unsigned char)'a';
     debug(), -1;
     int i = 42;
     debug(), "the answer:", i;
