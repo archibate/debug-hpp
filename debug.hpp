@@ -197,7 +197,7 @@
 # define DEBUG_ENABLE_FILES_MATCH 0
 #endif
 #ifndef DEBUG_ERROR_CODE_SHOW_NUMBER
-# define DEBUG_ERROR_CODE_SHOW_NUMBER 0
+# define DEBUG_ERROR_CODE_SHOW_NUMBER 1
 #endif
 #ifndef DEBUG_PANIC_METHOD
 # define DEBUG_PANIC_METHOD 1
@@ -456,14 +456,14 @@ private:
         }
     };
 #  ifndef DEBUG_SOURCE_LOCATION_FAKER
-#   define DEBUG_SOURCE_LOCATION_FAKER \
-       { __FILE__, __LINE__, 0, __func__ }
+#   define DEBUG_SOURCE_LOCATION_FAKER {__FILE__, __LINE__, 0, __func__}
 #  endif
 #  define DEBUG_SOURCE_LOCATION debug::debug_source_location
 # endif
     template <class T>
-    static auto debug_deref_avoid(T const &t)
-        -> typename std::enable_if<!std::is_void<decltype(*t)>::value, decltype(*t)>::type {
+    static auto debug_deref_avoid(T const &t) ->
+        typename std::enable_if<!std::is_void<decltype(*t)>::value,
+                                decltype(*t)>::type {
         return *t;
     }
 
@@ -474,8 +474,9 @@ private:
     };
 
     template <class T>
-    static auto debug_deref_avoid(T const &t)
-        -> typename std::enable_if<std::is_void<decltype(*t)>::value, debug_special_void>::type {
+    static auto debug_deref_avoid(T const &t) ->
+        typename std::enable_if<std::is_void<decltype(*t)>::value,
+                                debug_special_void>::type {
         return debug_special_void();
     }
 
@@ -561,13 +562,13 @@ private:
         };
     };
 
-#  define DEBUG_COND(n, ...) \
-      template <class T, class = void> \
-      struct debug_cond_##n : std::false_type {}; \
-      template <class T> \
-      struct debug_cond_##n<T, \
-                            typename debug_void<decltype(__VA_ARGS__)>::type> \
-          : std::true_type {};
+# define DEBUG_COND(n, ...) \
+     template <class T, class = void> \
+     struct debug_cond_##n : std::false_type {}; \
+     template <class T> \
+     struct debug_cond_##n<T, \
+                           typename debug_void<decltype(__VA_ARGS__)>::type> \
+         : std::true_type {};
     DEBUG_COND(is_ostream_ok, std::declval<std::ostream &>()
                                   << std::declval<T const &>());
     DEBUG_COND(is_range, begin(std::declval<T const &>()) !=
@@ -594,12 +595,12 @@ private:
         void operator()(T const &) const {}
     };
 
-#  if __cpp_lib_variant
+# if __cpp_lib_variant
     DEBUG_COND(is_variant, std::variant_size<T>::value);
-#   else
+# else
     template <class>
     struct debug_cond_is_variant : std::false_type {};
-#  endif
+# endif
     DEBUG_COND(is_smart_pointer, static_cast<void const volatile *>(
                                      std::declval<T const &>().get()));
     DEBUG_COND(is_optional, (((void)*std::declval<T const &>(), (void)0),
@@ -610,9 +611,9 @@ private:
             std::is_same<typename T::type &,
                          decltype(std::declval<T const &>().get())>::value,
             int>::type)0);
-#  define DEBUG_CON(n, ...) \
-      template <class T> \
-      struct debug_cond_##n : debug_bool_constant<__VA_ARGS__> {};
+# define DEBUG_CON(n, ...) \
+     template <class T> \
+     struct debug_cond_##n : debug_bool_constant<__VA_ARGS__> {};
     DEBUG_CON(string, std::is_convertible<T, DEBUG_STRING_VIEW>::value ||
                           std::is_convertible<T, std::string>::value);
     DEBUG_CON(bool, std::is_same<T, bool>::value);
@@ -621,22 +622,22 @@ private:
     DEBUG_CON(error_code, std::is_same<T, std::errc>::value ||
                               std::is_same<T, std::error_code>::value ||
                               std::is_same<T, std::error_condition>::value);
-#  if __cpp_char8_t
+# if __cpp_char8_t
     DEBUG_CON(unicode_char, std::is_same<T, char8_t>::value ||
                                 std::is_same<T, char16_t>::value ||
                                 std::is_same<T, char32_t>::value ||
                                 std::is_same<T, wchar_t>::value);
-#  else
+# else
     DEBUG_CON(unicode_char, std::is_same<T, char16_t>::value ||
                                 std::is_same<T, char32_t>::value ||
                                 std::is_same<T, wchar_t>::value);
-#  endif
-#  if DEBUG_UNSIGNED_AS_HEXADECIMAL
+# endif
+# if DEBUG_UNSIGNED_AS_HEXADECIMAL
     DEBUG_CON(integral_unsigned,
               std::is_integral<T>::value &&std::is_unsigned<T>::value);
-#  else
+# else
     DEBUG_CON(integral_unsigned, false);
-#  endif
+# endif
     DEBUG_CON(integral, std::is_integral<T>::value);
     DEBUG_CON(floating_point, std::is_floating_point<T>::value);
     DEBUG_CON(pointer, std::is_pointer<T>::value ||
@@ -723,9 +724,9 @@ private:
             oss << "'\\"
                 << " xu U"[sizeof(T)] << std::hex << std::setfill('0')
                 << std::setw(sizeof(T) * 2)
-#  if DEBUG_HEXADECIMAL_UPPERCASE
+# if DEBUG_HEXADECIMAL_UPPERCASE
                 << std::uppercase
-#  endif
+# endif
                 << static_cast<std::uint32_t>(t) << "'";
             oss.flags(f);
         }
@@ -741,12 +742,12 @@ private:
         void operator()(std::ostream &oss, T const &t) const {
             auto f = oss.flags();
             oss << "0x" << std::hex << std::setfill('0')
-#  if DEBUG_UNSIGNED_AS_HEXADECIMAL >= 2
+# if DEBUG_UNSIGNED_AS_HEXADECIMAL >= 2
                 << std::setw(sizeof(T) * 2)
-#  endif
-#  if DEBUG_HEXADECIMAL_UPPERCASE
+# endif
+# if DEBUG_HEXADECIMAL_UPPERCASE
                 << std::uppercase
-#  endif
+# endif
                 ;
             oss << static_cast<std::uintmax_t>(
                 static_cast<typename std::make_unsigned<T>::type>(t));
@@ -763,7 +764,9 @@ private:
                !debug_cond_integral_unsigned<T>::value &&
                debug_cond_integral<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-            oss << static_cast<typename std::conditional<std::is_signed<T>::value, std::intmax_t, std::uintmax_t>::type>(t);
+            oss << static_cast<typename std::conditional<
+                std::is_signed<T>::value, std::intmax_t, std::uintmax_t>::type>(
+                t);
         }
     };
 
@@ -797,33 +800,33 @@ private:
         void operator()(std::ostream &oss, T const &t) const {
             auto const *p = t.get();
             if (p != nullptr) {
-#  if DEBUG_SMART_POINTER_MODE == 1
+# if DEBUG_SMART_POINTER_MODE == 1
                 debug_format(oss, *p);
-#  elif DEBUG_SMART_POINTER_MODE == 2
+# elif DEBUG_SMART_POINTER_MODE == 2
                 auto f = oss.flags();
                 oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
                     << std::setfill('0')
-#   if DEBUG_HEXADECIMAL_UPPERCASE
+#  if DEBUG_HEXADECIMAL_UPPERCASE
                     << std::uppercase
-#   endif
+#  endif
                     ;
                 oss << reinterpret_cast<std::uintptr_t>(
                     static_cast<void const volatile *>(p));
                 oss.flags(f);
-#  else
+# else
                 debug_format(oss, *p);
                 oss << DEBUG_SMART_POINTER_AT;
                 auto f = oss.flags();
                 oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
                     << std::setfill('0')
-#   if DEBUG_HEXADECIMAL_UPPERCASE
+#  if DEBUG_HEXADECIMAL_UPPERCASE
                     << std::uppercase
-#   endif
+#  endif
                     ;
                 oss << reinterpret_cast<std::uintptr_t>(
                     static_cast<void const volatile *>(p));
                 oss.flags(f);
-#  endif
+# endif
             } else {
                 oss << DEBUG_NULLPTR_STRING;
             }
@@ -884,9 +887,9 @@ private:
             if (t == nullptr) {
                 oss << DEBUG_POINTER_HEXADECIMAL_PREFIX << std::hex
                     << std::setfill('0')
-#  if DEBUG_HEXADECIMAL_UPPERCASE
+# if DEBUG_HEXADECIMAL_UPPERCASE
                     << std::uppercase
-#  endif
+# endif
                     ;
                 oss << reinterpret_cast<std::uintptr_t>(
                     reinterpret_cast<void const volatile *>(t));
@@ -927,7 +930,7 @@ private:
             oss << DEBUG_RANGE_BRACE[1];
         }
     };
-#  if __cpp_lib_integer_sequence
+# if __cpp_lib_integer_sequence
     template <class F, class Tuple, std::size_t... I>
     static void debug_apply_impl(F &&f, Tuple &&t, std::index_sequence<I...>) {
         std::forward<F>(f)(std::get<I>(std::forward<Tuple>(t))...);
@@ -940,7 +943,7 @@ private:
             std::make_index_sequence<
                 std::tuple_size<typename std::decay<Tuple>::type>::value>{});
     }
-#  else
+# else
     template <std::size_t... I>
     struct debug_index_sequence {};
 
@@ -963,7 +966,7 @@ private:
             debug_make_index_sequence<
                 std::tuple_size<typename std::decay<Tuple>::type>::value>{});
     }
-#  endif
+# endif
     struct debug_apply_lambda {
         std::ostream &oss;
         bool &add_comma;
@@ -1024,13 +1027,13 @@ private:
             !debug_cond_is_tuple<T>::value &&
             debug_cond_enum<T>::value>::type> {
         void operator()(std::ostream &oss, T const &t) const {
-#  ifdef DEBUG_MAGIC_ENUM
+# ifdef DEBUG_MAGIC_ENUM
             oss << DEBUG_MAGIC_ENUM(t);
-#  else
+# else
             oss << debug_demangle(typeid(T).name()) << DEBUG_ENUM_BRACE[0];
             oss << static_cast<typename std::underlying_type<T>::type>(t);
             oss << DEBUG_ENUM_BRACE[1];
-#  endif
+# endif
         }
     };
 
@@ -1045,16 +1048,16 @@ private:
     struct debug_format_trait<std::errc, V> {
         void operator()(std::ostream &oss, std::errc const &t) const {
             oss << DEBUG_ERROR_CODE_BRACE[0];
-            if (t != std::errc()) {
+            // if (t != std::errc()) {
                 oss << std::generic_category().name() << DEBUG_ERROR_CODE_INFIX
-#  if DEBUG_ERROR_CODE_SHOW_NUMBER
+# if DEBUG_ERROR_CODE_SHOW_NUMBER
                     << ' ' << static_cast<int>(t)
-#  endif
+# endif
                     << DEBUG_ERROR_CODE_POSTFIX;
                 oss << std::generic_category().message(static_cast<int>(t));
-            } else {
-                oss << DEBUG_ERROR_CODE_NO_ERROR;
-            }
+            // } else {
+            //     oss << DEBUG_ERROR_CODE_NO_ERROR;
+            // }
             oss << DEBUG_ERROR_CODE_BRACE[1];
         }
     };
@@ -1065,9 +1068,9 @@ private:
             oss << DEBUG_ERROR_CODE_BRACE[0];
             if (t) {
                 oss << t.category().name() << DEBUG_ERROR_CODE_INFIX
-#  if DEBUG_ERROR_CODE_SHOW_NUMBER
+# if DEBUG_ERROR_CODE_SHOW_NUMBER
                     << ' ' << t.value()
-#  endif
+# endif
                     << DEBUG_ERROR_CODE_POSTFIX << t.message();
             } else {
                 oss << DEBUG_ERROR_CODE_NO_ERROR;
@@ -1080,14 +1083,17 @@ private:
     struct debug_format_trait<std::error_condition, V> {
         void operator()(std::ostream &oss,
                         std::error_condition const &t) const {
-            oss << DEBUG_UNKNOWN_TYPE_BRACE[0];
+            oss << DEBUG_ERROR_CODE_BRACE[0];
             if (t) {
-                oss << t.category().name() << " error " << t.value() << ": "
-                    << t.message();
+                oss << t.category().name() << DEBUG_ERROR_CODE_INFIX
+# if DEBUG_ERROR_CODE_SHOW_NUMBER
+                    << ' ' << t.value()
+# endif
+                    << DEBUG_ERROR_CODE_POSTFIX << t.message();
             } else {
-                oss << "no error";
+                oss << DEBUG_ERROR_CODE_NO_ERROR;
             }
-            oss << DEBUG_UNKNOWN_TYPE_BRACE[1];
+            oss << DEBUG_ERROR_CODE_BRACE[1];
         }
     };
 
@@ -1727,6 +1733,67 @@ public:
     static T const &raw_repr_if_string(T const &value) {
         return value;
     }
+
+    template <class T>
+    static typename std::enable_if<std::is_integral<T>::value>::type _hexdump_print_hex(std::ostream &os, T const &value) {
+        os << std::hex << std::setfill('0') << std::uppercase << std::setw(sizeof(T) * 2);
+        os << static_cast<std::uintmax_t>(static_cast<typename std::make_unsigned<T>::type>(value));
+    }
+
+    template <class T>
+    static typename std::enable_if<!std::is_integral<T>::value>::type _hexdump_print_hex(std::ostream &os, T const &value) {
+        debug_format(os, value);
+    }
+
+    template <class It, class Ite>
+    struct hexdump_t {
+        It first;
+        Ite last;
+
+        void DEBUG_REPR_NAME(std::ostream &os) const {
+            bool previous = false;
+            auto f = os.flags();
+            for (It it = first; it != last; ++it) {
+                if (previous) {
+                    os << ' ';
+                }
+                _hexdump_print_hex(os, *it);
+                previous = true;
+            }
+            os.flags(f);
+        }
+    };
+
+    template <class T>
+    static hexdump_t<decltype(std::begin(std::declval<T &&>())),
+              decltype(std::end(std::declval<T &&>()))>
+    _hexdump_impl(T const &value, short, int) {
+        return {std::begin(value), std::end(value)};
+    }
+
+# if __cpp_lib_nonmember_container_access
+    template <class T>
+    static hexdump_t<
+        decltype(std::declval<T const *&>() = std::data(std::declval<T &&>())),
+        decltype(std::data(std::declval<T &&>()) +
+                 std::size(std::declval<T &&>()))>
+    _hexdump_impl(T const &value, int, int) {
+        T const *p = std::begin(value);
+        return {p, p + std::size(value)};
+    }
+# endif
+
+    template <class T>
+    static hexdump_t<std::uint8_t const *, std::uint8_t const *>
+    _hexdump_impl(T const &value, short, short) {
+        auto p = reinterpret_cast<std::uint8_t const *>(std::addressof(value));
+        return {p, p + sizeof(T)};
+    }
+
+    template <class T>
+    static decltype(_hexdump_impl(std::declval<T const &>(), 0, 0)) hexdump(T const &value) {
+        return _hexdump_impl(value, 0, 0);
+    }
 };
 # if defined(_MSC_VER) && (!defined(_MSVC_TRADITIONAL) || _MSVC_TRADITIONAL)
 #  define DEBUG_REPR(...) \
@@ -1986,29 +2053,23 @@ public:
     }
 
     template <class T>
-    struct named_member_t {
-        char const *name;
-        T const &value;
-    };
-
-    template <class T>
-    static named_member_t<T> named_member(char const *name, T const &value) {
-        return {name, value};
+    static void named_member(char const *name, T const &value) {
+        return {};
     }
 
     template <class T>
-    struct raw_repr_t {
-        T const &value;
-    };
-
-    template <class T>
-    static raw_repr_t<T> raw_repr(T const &value) {
-        return {value};
+    static void raw_repr(T const &value) {
+        return {};
     }
 
     template <class T>
-    static T raw_repr_if_string(T const &value) {
-        return value;
+    static void raw_repr_if_string(T const &value) {
+        return {};
+    }
+
+    template <class T>
+    static void hexdump(T const &value) {
+        return {};
     }
 };
 

@@ -1,4 +1,3 @@
-// #define DEBUG_UNSIGNED_AS_HEXADECIMAL 1
 #define DEBUG_SHOW_THREAD_ID 1
 #include "debug.hpp"
 #include <map>
@@ -175,6 +174,12 @@ int main() {
 
     std::error_condition z14((int)std::io_errc::stream, std::iostream_category());
     debug(), z14;
+
+    std::string z15 = "\xde\xad\xbe\xaf";
+    debug(), debug::hexdump(z15);
+
+    int z16 = 0xdeadbeaf;
+    debug(), debug::hexdump(z16);
 
     return 0;
 }
