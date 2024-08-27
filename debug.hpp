@@ -2030,7 +2030,7 @@ private:
 
 public:
     template <class... Ts>
-    debug &setloc(Ts &&...ts) noexcept {
+    debug &setloc(Ts &&...) noexcept {
         return *this;
     }
 
@@ -2053,27 +2053,34 @@ public:
     }
 
     template <class T>
-    static void named_member(char const *name, T const &value) {
-        return {};
+    static void named_member(char const *, T const &) {
     }
 
     template <class T>
-    static void raw_repr(T const &value) {
-        return {};
+    static void raw_repr(T const &) {
     }
 
     template <class T>
-    static void raw_repr_if_string(T const &value) {
-        return {};
+    static void raw_repr_if_string(T const &) {
     }
 
     template <class T>
-    static void hexdump(T const &value) {
-        return {};
+    static void hexdump(T const &) {
     }
+
+    struct debug_formatter {
+        std::ostream &os;
+
+        template <class T>
+        debug_formatter &operator<<(T const &) {
+            return *this;
+        }
+    };
 };
 
 # define DEBUG_REPR(...)
+# define DEBUG_REPR_GLOBAL(...)
+# define DEBUG_REPR_GLOBAL_TEMPLATED(...)
 DEBUG_NAMESPACE_END
 #endif
 #ifdef DEBUG_CLASS_NAME

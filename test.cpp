@@ -4,6 +4,8 @@
 #include <set>
 #include <chrono>
 #include <memory>
+#include <iostream>
+#include <system_error>
 #if __cplusplus >= 201703L
 # ifdef __has_include
 #  if __has_include(<variant>)
@@ -46,9 +48,7 @@ struct Student3 {
 DEBUG_REPR_GLOBAL_TEMPLATED(Student3, (Name, Age), (class Name, class Age), name, age);
 
 struct Student4 {
-#if DEBUG_PP_VA_OPT_SUPPORT(?)
     DEBUG_REPR();
-#endif
 };
 
 int main() {
