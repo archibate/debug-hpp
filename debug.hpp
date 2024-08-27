@@ -1049,12 +1049,12 @@ private:
         void operator()(std::ostream &oss, std::errc const &t) const {
             oss << DEBUG_ERROR_CODE_BRACE[0];
             // if (t != std::errc()) {
-                oss << std::generic_category().name() << DEBUG_ERROR_CODE_INFIX
+            oss << std::generic_category().name() << DEBUG_ERROR_CODE_INFIX
 # if DEBUG_ERROR_CODE_SHOW_NUMBER
-                    << ' ' << static_cast<int>(t)
+                << ' ' << static_cast<int>(t)
 # endif
-                    << DEBUG_ERROR_CODE_POSTFIX;
-                oss << std::generic_category().message(static_cast<int>(t));
+                << DEBUG_ERROR_CODE_POSTFIX;
+            oss << std::generic_category().message(static_cast<int>(t));
             // } else {
             //     oss << DEBUG_ERROR_CODE_NO_ERROR;
             // }
@@ -1735,13 +1735,17 @@ public:
     }
 
     template <class T>
-    static typename std::enable_if<std::is_integral<T>::value>::type _hexdump_print_hex(std::ostream &os, T const &value) {
-        os << std::hex << std::setfill('0') << std::uppercase << std::setw(sizeof(T) * 2);
-        os << static_cast<std::uintmax_t>(static_cast<typename std::make_unsigned<T>::type>(value));
+    static typename std::enable_if<std::is_integral<T>::value>::type
+    _hexdump_print_hex(std::ostream &os, T const &value) {
+        os << std::hex << std::setfill('0') << std::uppercase
+           << std::setw(sizeof(T) * 2);
+        os << static_cast<std::uintmax_t>(
+            static_cast<typename std::make_unsigned<T>::type>(value));
     }
 
     template <class T>
-    static typename std::enable_if<!std::is_integral<T>::value>::type _hexdump_print_hex(std::ostream &os, T const &value) {
+    static typename std::enable_if<!std::is_integral<T>::value>::type
+    _hexdump_print_hex(std::ostream &os, T const &value) {
         debug_format(os, value);
     }
 
@@ -1766,7 +1770,7 @@ public:
 
     template <class T>
     static hexdump_t<decltype(std::begin(std::declval<T &&>())),
-              decltype(std::end(std::declval<T &&>()))>
+                     decltype(std::end(std::declval<T &&>()))>
     _hexdump_impl(T const &value, short, int) {
         return {std::begin(value), std::end(value)};
     }
@@ -1791,7 +1795,8 @@ public:
     }
 
     template <class T>
-    static decltype(_hexdump_impl(std::declval<T const &>(), 0, 0)) hexdump(T const &value) {
+    static decltype(_hexdump_impl(std::declval<T const &>(), 0, 0))
+    hexdump(T const &value) {
         return _hexdump_impl(value, 0, 0);
     }
 };
@@ -2053,20 +2058,16 @@ public:
     }
 
     template <class T>
-    static void named_member(char const *, T const &) {
-    }
+    static void named_member(char const *, T const &) {}
 
     template <class T>
-    static void raw_repr(T const &) {
-    }
+    static void raw_repr(T const &) {}
 
     template <class T>
-    static void raw_repr_if_string(T const &) {
-    }
+    static void raw_repr_if_string(T const &) {}
 
     template <class T>
-    static void hexdump(T const &) {
-    }
+    static void hexdump(T const &) {}
 
     struct debug_formatter {
         std::ostream &os;
