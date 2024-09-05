@@ -292,10 +292,10 @@ struct Reporter {
     void run_entry(Entry const &ent, Options const &options = {});
     void run_all(Options const &options = {});
 
+    virtual ~Reporter() = default;
+
     virtual void report_state(const char *name, State &state);
     virtual void write_report(const char *name, Row const &row) = 0;
-
-    virtual ~Reporter() = default;
 };
 
 Reporter *makeConsoleReporter();
@@ -883,5 +883,15 @@ Reporter *makeMultipleReporter(std::vector<Reporter *> const &reporters) {
     return new MultipleReporter(reporters);
 }
 
+}
+#endif
+
+#ifdef TINYBENCH_IMPL_MAIN
+#include <memory>
+
+[[gnu::weak]] int main() {
+    std::unique_ptr<tinybench::Reporter> rep(tinybench::makeMultipleReporter({tinybench::makeConsoleReporter()}));
+    rep->run_all();
+    return 0;
 }
 #endif
