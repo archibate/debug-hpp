@@ -571,8 +571,8 @@ private:
          : std::true_type {};
     DEBUG_COND(is_ostream_ok, std::declval<std::ostream &>()
                                   << std::declval<T const &>());
-    DEBUG_COND(is_range, begin(std::declval<T const &>()) !=
-                             end(std::declval<T const &>()));
+    DEBUG_COND(is_range, std::begin(std::declval<T const &>()) !=
+                             std::end(std::declval<T const &>()));
     DEBUG_COND(is_tuple, std::tuple_size<T>::value);
     DEBUG_COND(is_member_repr, std::declval<T const &>().DEBUG_REPR_NAME());
     DEBUG_COND(is_member_repr_stream, std::declval<T const &>().DEBUG_REPR_NAME(
@@ -918,8 +918,8 @@ private:
         void operator()(std::ostream &oss, T const &t) const {
             oss << DEBUG_RANGE_BRACE[0];
             bool add_comma = false;
-            auto b = begin(t);
-            auto e = end(t);
+            auto b = std::begin(t);
+            auto e = std::end(t);
             for (auto it = b; it != e; ++it) {
                 if (add_comma) {
                     oss << DEBUG_RANGE_COMMA;
